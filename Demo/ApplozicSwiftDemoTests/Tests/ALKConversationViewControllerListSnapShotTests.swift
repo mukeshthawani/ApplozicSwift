@@ -26,6 +26,8 @@ class ALKConversationViewControllerListSnapShotTests: QuickSpec {
                 conversationVC = ALKConversationListViewController(configuration: ALKConfiguration())
                 ALMessageDBServiceMock.lastMessage.createdAtTime = NSNumber(value: Date().timeIntervalSince1970 * 1000)
                 conversationVC.dbService = ALMessageDBServiceMock()
+                conversationVC.userService = ALUserServiceMock()
+
                 let firstMessage = MockMessage().message
                 firstMessage.message = "first message"
                 let secondmessage = MockMessage().message
@@ -40,7 +42,12 @@ class ALKConversationViewControllerListSnapShotTests: QuickSpec {
             it("Show list") {
                 XCTAssertNotNil(navigationController.view)
                 XCTAssertNotNil(conversationVC.view)
-                expect(navigationController).to(haveValidSnapshot())
+                expect(navigationController)
+                    .toEventually(
+                        haveValidSnapshot(),
+                        timeout: 3.0,
+                        pollInterval: 0.5,
+                        description: nil)
             }
 
             it("Open chat thread") {
@@ -48,7 +55,12 @@ class ALKConversationViewControllerListSnapShotTests: QuickSpec {
                 let tableView = conversationVC.tableView 
                 tableView.delegate?.tableView?(tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
                 XCTAssertNotNil(conversationVC.navigationController?.view)
-                expect(conversationVC.navigationController).toEventually(haveValidSnapshot())
+                expect(conversationVC.navigationController)
+                    .toEventually(
+                        haveValidSnapshot(),
+                        timeout: 2.0,
+                        pollInterval: 0.5,
+                        description: nil)
             }
         }
 
@@ -68,7 +80,12 @@ class ALKConversationViewControllerListSnapShotTests: QuickSpec {
             }
 
             it("show email thread") {
-                expect(navigationController).to(haveValidSnapshot())
+                expect(navigationController)
+                    .toEventually(
+                        haveValidSnapshot(),
+                        timeout: 2.0,
+                        pollInterval: 0.5,
+                        description: nil)
             }
         }
 

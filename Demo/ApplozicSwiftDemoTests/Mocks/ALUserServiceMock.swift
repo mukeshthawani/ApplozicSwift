@@ -18,4 +18,7 @@ class ALUserServiceMock: ALUserService {
         completion(nil)
     }
 
+    override func getUserDetail(_ userId: String!, withCompletion completion: ((ALContact?) -> Void)!) {
+        completion(nil)
+    }
 }

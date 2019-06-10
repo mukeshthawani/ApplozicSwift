@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import ContactsUI
 import Applozic
+import DifferenceKit
 
 /// The delegate of an `ALKConversationListViewController` object.
 /// Provides different methods to manage chat thread selections.
@@ -29,6 +30,8 @@ open class ALKConversationListViewController: ALKBaseViewController, Localizable
     public var conversationListTableViewController: ALKConversationListTableViewController
 
     var dbService = ALMessageDBService()
+    var channelService = ALChannelService()
+    var userService = ALUserService()
     var viewModel = ALKConversationListViewModel()
 
     // To check if coming from push notification
@@ -172,6 +175,8 @@ open class ALKConversationListViewController: ALKBaseViewController, Localizable
         view.addSubview(activityIndicator)
         self.view.bringSubviewToFront(activityIndicator)
         self.edgesForExtendedLayout = []
+        viewModel.channelService = channelService
+        viewModel.userService = userService
         viewModel.prepareController(dbService: dbService)
     }
 
@@ -182,6 +187,7 @@ open class ALKConversationListViewController: ALKBaseViewController, Localizable
         alMqttConversationService.subscribeToConversation()
         dbService.delegate = self
         viewModel.delegate = self
+        viewModel.controllerContext = conversationListTableViewController
         setupView()
     }
 
@@ -327,6 +333,19 @@ open class ALKConversationListViewController: ALKBaseViewController, Localizable
     func conversationVC() -> ALKConversationViewController? {
         return navigationController?.topViewController as? ALKConversationViewController
     }
+
+    func reloadChatSections() {
+        self.viewModel.chatsections(completion: { chatSections in
+            let sections = chatSections
+                .map {
+                    ArraySection<AnySection, AnyChatItem>(
+                        model: AnySection($0),
+                        elements: $0.viewModels)
+            }
+            self.conversationListTableViewController
+                .update(sections: sections)
+        })
+    }
 }
 
 // MARK: ALMessagesDelegate
@@ -354,16 +373,27 @@ extension ALKConversationListViewController: ALKConversationListViewModelDelegat
     }
 
     open func listUpdated() {
-        DispatchQueue.main.async {
-            print("Number of rows \(self.tableView.numberOfRows(inSection: 0))")
-            self.tableView.reloadData()
-            self.activityIndicator.stopAnimating()
-            self.tableView.isUserInteractionEnabled = true
-        }
+        print("Number of rows \(self.tableView.numberOfRows(inSection: 0))")
+        self.viewModel.chatsections(completion: { chatSections in
+                let sections = chatSections
+                    .map {
+                        ArraySection<AnySection, AnyChatItem>(
+                        model: AnySection($0),
+                        elements: $0.viewModels)
+                }
+                self.conversationListTableViewController
+                    .update(sections: sections)
+                self.activityIndicator.stopAnimating()
+                self.tableView.isUserInteractionEnabled = true
+        })
     }
 
     open func rowUpdatedAt(position: Int) {
-        tableView.reloadRows(at: [IndexPath(row: position, section: 0)], with: .automatic)
+        reloadChatSections()
+    }
+
+    open func newMessagesAdded() {
+        reloadChatSections()
     }
 }
 
@@ -510,6 +540,7 @@ extension ALKConversationListViewController: ALKConversationListTableViewDelegat
     }
 
     public func userBlockNotification(userId: String, isBlocked: Bool) {
+        reloadChatSections()
         var dic =  [AnyHashable : Any]()
         dic["UserId"] = userId
         dic["Controller"] = self
@@ -518,6 +549,7 @@ extension ALKConversationListViewController: ALKConversationListTableViewDelegat
     }
 
     public func muteNotification(conversation: ALMessage, isMuted: Bool) {
+        reloadChatSections()
         var dic =  [AnyHashable : Any]()
         dic["Muted"] = isMuted
         dic["Controller"] = self

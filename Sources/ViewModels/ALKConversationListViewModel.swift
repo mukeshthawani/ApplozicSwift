@@ -14,6 +14,7 @@ protocol ALKConversationListViewModelDelegate: class {
     func startedLoading()
     func listUpdated()
     func rowUpdatedAt(position: Int)
+    func newMessagesAdded()
 }
 
 /**
@@ -86,6 +87,7 @@ public protocol ALKConversationListViewModelProtocol: class {
     ///   - withCompletion: Escaping closure when unblock request is complete.
     func unblock(conversation: ALMessage, withCompletion: @escaping (Error?, Bool) -> Void)
 
+
 }
 
 final public class ALKConversationListViewModel: NSObject, ALKConversationListViewModelProtocol, Localizable {
@@ -93,9 +95,13 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
     weak var delegate: ALKConversationListViewModelDelegate?
 
     var localizationFileName = String()
-    var alChannelService = ALChannelService()
+    var channelService = ALChannelService()
     var alContactService = ALContactService()
     var conversationService = ALConversationService()
+    var userService = ALUserService()
+
+    // For chat cell delegate
+    weak var controllerContext: UIViewController?
 
     fileprivate var allMessages = [Any]()
 
@@ -117,11 +123,11 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
     }
 
     public func chatFor(indexPath: IndexPath) -> ALKChatViewModelProtocol? {
-        guard indexPath.row < allMessages.count else {
+        guard indexPath.section < allMessages.count else {
             return nil
         }
 
-        guard let alMessage = allMessages[indexPath.row] as? ALMessage else {
+        guard let alMessage = allMessages[indexPath.section] as? ALMessage else {
             return nil
         }
         return alMessage
@@ -134,6 +140,7 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
                 return
         }
         allMessages.remove(at: index)
+        delegate?.listUpdated()
     }
 
     func updateTypingStatus(in viewController: ALKConversationViewController, userId: String, status: Bool) {
@@ -181,6 +188,7 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
                 allMessages[index] = currentMessage
                 self.allMessages[index] = currentMessage
             } else {
+                allMessages.append(currentMessage)
                 self.allMessages.append(currentMessage)
             }
         }
@@ -188,8 +196,7 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
 
             self.allMessages = allMessages.sorted { ($0.createdAtTime != nil && $1.createdAtTime != nil) ? Int(truncating: $0.createdAtTime) > Int(truncating: $1.createdAtTime):false }
         }
-        delegate?.listUpdated()
-
+        delegate?.newMessagesAdded()
     }
 
     func updateStatusFor(userDetail: ALUserDetail) {
@@ -223,12 +230,12 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
     }
 
     public func sendMuteRequestFor(message: ALMessage, tillTime: NSNumber, withCompletion: @escaping (Bool)->Void) {
-        if message.isGroupChat, let channel = ALChannelService().getChannelByKey(message.groupId) {
+        if message.isGroupChat, let channel = channelService.getChannelByKey(message.groupId) {
             // Unmute channel
             let muteRequest = ALMuteRequest()
             muteRequest.id = channel.key
             muteRequest.notificationAfterTime = tillTime as NSNumber
-            ALChannelService().muteChannel(muteRequest) { (_, error) in
+            channelService.muteChannel(muteRequest) { (_, error) in
                 if error != nil {
                     withCompletion(false)
                 }
@@ -239,7 +246,7 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
             let muteRequest = ALMuteRequest()
             muteRequest.userId = contact.userId
             muteRequest.notificationAfterTime = tillTime as NSNumber
-            ALUserService().muteUser(muteRequest) { (_, error) in
+            userService.muteUser(muteRequest) { (_, error) in
                 if error != nil {
                     withCompletion(false)
                 }
@@ -251,7 +258,7 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
     }
 
     public func block(conversation: ALMessage, withCompletion: @escaping (Error?, Bool) -> Void) {
-        ALUserService().blockUser(conversation.contactIds) { (error, _) in
+        userService.blockUser(conversation.contactIds) { (error, _) in
             guard let error = error else {
                 print("UserId \(String(describing: conversation.contactIds)) is successfully blocked")
                 withCompletion(nil, true)
@@ -263,7 +270,7 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
     }
 
     public func unblock(conversation: ALMessage, withCompletion: @escaping (Error?, Bool) -> Void) {
-        ALUserService().unblockUser(conversation.contactIds) { (error, _) in
+        userService.unblockUser(conversation.contactIds) { (error, _) in
             guard let error = error else {
                 print("UserId \(String(describing: conversation.contactIds)) is successfully unblocked")
                 withCompletion(nil, true)
@@ -291,5 +298,58 @@ final public class ALKConversationListViewModel: NSObject, ALKConversationListVi
             conversationProxy: convProxy,
             localizedStringFileName : localizationFileName)
         return convViewModel
+    }
+
+    func chatsections(completion: @escaping ([ChatSection]) -> ()) {
+        var sections = [ChatSection]()
+        let group = DispatchGroup()
+        for message in allMessages {
+            guard let message = message as? ALMessage else { continue }
+            if let channelId = message.groupId {
+                group.enter()
+                channelService.getChannelInformation(channelId, orClientChannelKey: nil) { [weak self] channel in
+                    guard let channel = channel else {
+                        group.leave()
+                        return
+                    }
+                    sections.append(ChatSection(
+                        message: message,
+                        channel: channel,
+                        contact: nil,
+                        controllerContext: self?.controllerContext))
+                    group.leave()
+                }
+
+            } else if let contactId = message.contactId {
+                group.enter()
+                userService.getUserDetail(contactId) { [weak self] contact in
+                    guard let contact = contact else {
+                        // User deleted
+
+                        let contact = ALContact()
+                        contact.userId = contactId
+                        sections.append(ChatSection(
+                            message: message,
+                            channel: nil,
+                            contact: contact,
+                            controllerContext: self?.controllerContext))
+                        group.leave()
+                        return
+                    }
+                    sections.append(ChatSection(
+                        message: message,
+                        channel: nil,
+                        contact: contact,
+                        controllerContext: self?.controllerContext))
+                    group.leave()
+                }
+            } else {
+                print("Not a channel or contact")
+            }
+        }
+        group.notify(queue: .main) {
+            let sortedSections = sections.sorted{ ($0.message.createdAtTime != nil && $1.message.createdAtTime != nil) ? Int(truncating: $0.message.createdAtTime) > Int(truncating: $1.message.createdAtTime):false }
+            completion(sortedSections)
+        }
     }
 }

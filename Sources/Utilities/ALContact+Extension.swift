@@ -32,4 +32,8 @@ extension ALContact: ALKContactProtocol {
     public var friendMood: String? {
         return nil
     }
+
+    public var isDeleted: Bool {
+         return deletedAtTime == 1
+    }
 }
