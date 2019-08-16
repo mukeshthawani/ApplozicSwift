@@ -10,7 +10,7 @@ import Applozic
 import Kingfisher
 import UIKit
 
-protocol ALKLocationCellDelegate: AnyObject {
+protocol ALKLocationCellDelegate: class {
     func displayLocation(location: ALKLocationPreviewViewModel)
 }
 

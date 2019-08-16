@@ -38,8 +38,7 @@ open class ALKBaseViewController: UIViewController, ALKConfigurable {
             navigationItem.leftBarButtonItem = UIBarButtonItem(image: backImage, style: .plain, target: self, action: #selector(backTapped))
         }
         if configuration.hideNavigationBarBottomLine {
-            navigationController?.navigationBar.hideBottomHairline()
-        }
+            navigationController?.navigationBar.hideBottomHairline() }
     }
 
     open override func viewDidLoad() {

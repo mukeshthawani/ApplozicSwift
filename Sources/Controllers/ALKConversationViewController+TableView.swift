@@ -37,8 +37,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 cell.update(viewModel: message)
                 cell.update(chatBar: chatBar)
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 cell.replyViewAction = { [weak self] in
                     self?.scrollTo(message: message)
                 }
@@ -55,8 +54,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                     self?.messageAvatarViewDidTap(messageVM: currentModel, indexPath: indexPath)
                 }
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 cell.replyViewAction = { [weak self] in
                     self?.scrollTo(message: message)
                 }
@@ -72,8 +70,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 cell.update(viewModel: message)
                 cell.update(chatBar: chatBar)
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
 
             } else {
@@ -87,8 +84,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                     self?.messageAvatarViewDidTap(messageVM: currentModel, indexPath: indexPath)
                 }
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
             }
         case .photo:
@@ -116,8 +112,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                         self?.attachmentViewDidTapDownload(view: cell, indexPath: indexPath)
                     }
                     cell.menuAction = { [weak self] action in
-                        self?.menuItemSelected(action: action, message: message)
-                    }
+                        self?.menuItemSelected(action: action, message: message) }
                     return cell
 
                 } else {
@@ -130,8 +125,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                         self?.attachmentUploadDidCompleteWith(response: responseDict, indexPath: indexPath)
                     }
                     cell.menuAction = { [weak self] action in
-                        self?.menuItemSelected(action: action, message: message)
-                    }
+                        self?.menuItemSelected(action: action, message: message) }
                     return cell
                 }
 
@@ -150,16 +144,14 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                         self?.messageAvatarViewDidTap(messageVM: currentModel, indexPath: indexPath)
                     }
                     cell.menuAction = { [weak self] action in
-                        self?.menuItemSelected(action: action, message: message)
-                    }
+                        self?.menuItemSelected(action: action, message: message) }
                     return cell
 
                 } else {
                     let cell: ALKFriendPhotoLandscapeCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
                     cell.showReport = configuration.isReportMessageEnabled
                     cell.menuAction = { [weak self] action in
-                        self?.menuItemSelected(action: action, message: message)
-                    }
+                        self?.menuItemSelected(action: action, message: message) }
                     cell.setLocalizedStringFileName(configuration.localizedStringFileName)
                     cell.update(viewModel: message)
                     return cell
@@ -180,8 +172,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 cell.update(viewModel: message)
                 cell.setCellDelegate(delegate: self)
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
             } else {
                 let cell: ALKFriendVoiceCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
@@ -197,8 +188,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                     self?.messageAvatarViewDidTap(messageVM: currentModel, indexPath: indexPath)
                 }
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
             }
         case .location:
@@ -209,8 +199,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 cell.update(viewModel: message)
                 cell.setDelegate(locDelegate: self)
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
 
             } else {
@@ -224,8 +213,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                     self?.messageAvatarViewDidTap(messageVM: currentModel, indexPath: indexPath)
                 }
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
             }
         case .information:
@@ -253,8 +241,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                     self?.attachmentViewDidTapDownload(view: cell, indexPath: indexPath)
                 }
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
             } else {
                 let cell: ALKFriendVideoCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
@@ -270,8 +257,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                     self?.messageAvatarViewDidTap(messageVM: currentModel, indexPath: indexPath)
                 }
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
             }
         case .genericCard, .cardTemplate:
@@ -282,8 +268,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 cell.register(cell: ALKGenericCardCell.self)
                 cell.update(viewModel: message, width: UIScreen.main.bounds.width)
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
             } else {
                 let cell: ALKFriendGenericCardCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
@@ -292,8 +277,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 cell.register(cell: ALKGenericCardCell.self)
                 cell.update(viewModel: message, width: UIScreen.main.bounds.width)
                 cell.menuAction = { [weak self] action in
-                    self?.menuItemSelected(action: action, message: message)
-                }
+                    self?.menuItemSelected(action: action, message: message) }
                 return cell
             }
         case .faqTemplate:

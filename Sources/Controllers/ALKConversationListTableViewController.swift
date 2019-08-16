@@ -11,7 +11,7 @@ import Foundation
 /**
  A delegate used to notify the receiver of the click events in `ConversationListTableViewController`
  */
-public protocol ALKConversationListTableViewDelegate: AnyObject {
+public protocol ALKConversationListTableViewDelegate: class {
     /// Tells the delegate which chat cell is tapped alongwith the position.
     func tapped(_ chat: ALKChatViewModelProtocol, at index: Int)
 

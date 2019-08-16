@@ -49,7 +49,7 @@ extension String {
     func evaluateStringWidth(textToEvaluate: String, fontSize: CGFloat) -> CGFloat {
         let font = UIFont.systemFont(ofSize: fontSize)
         let attributes = NSDictionary(object: font, forKey: NSAttributedString.Key.font as NSCopying)
-        let sizeOfText = textToEvaluate.size(withAttributes: attributes as! [NSAttributedString.Key: Any] as [NSAttributedString.Key: Any])
+        let sizeOfText = textToEvaluate.size(withAttributes: (attributes as! [NSAttributedString.Key: Any] as [NSAttributedString.Key: Any]))
         return sizeOfText.width
     }
 }

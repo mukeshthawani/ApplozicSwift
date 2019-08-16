@@ -38,12 +38,12 @@ extension ALKMessageViewModel {
             let metadata = self.metadata,
             let payload = metadata["payload"] as? String,
             let json = try? JSONSerialization.jsonObject(with: payload.data, options: .allowFragments),
-            let msg = json as? [String: Any]
+            let msg = json as? Dictionary<String, Any>
         else { return nil }
 
         var buttons = [String]()
 
-        if let btns = msg["buttons"] as? [[String: Any]] {
+        if let btns = msg["buttons"] as? [Dictionary<String, Any>] {
             btns.forEach {
                 if let name = $0["name"] as? String {
                     buttons.append(name)

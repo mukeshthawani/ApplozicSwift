@@ -10,7 +10,7 @@ import Applozic
 import Foundation
 
 public final class ALKNewChatViewModel {
-    private var localizedStringFileName: String!
+    fileprivate var localizedStringFileName: String!
 
     var friendList = [ALKContactProtocol]() // For UI presentation
     var bufferFriendList = [ALKContactProtocol]() {
@@ -33,7 +33,7 @@ public final class ALKNewChatViewModel {
         if keyword.isEmpty {
             friendList = bufferFriendList
         } else {
-            friendList = bufferFriendList.filter { ($0.friendProfileName != nil) ? $0.friendProfileName!.lowercased().contains(keyword.lowercased()) : false }
+            friendList = bufferFriendList.filter({ ($0.friendProfileName != nil) ? $0.friendProfileName!.lowercased().contains(keyword.lowercased()) : false })
         }
     }
 

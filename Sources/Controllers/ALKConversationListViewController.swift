@@ -403,7 +403,7 @@ extension ALKConversationListViewController: ALMQTTConversationDelegate {
         print("sync call: ", alMessage.message)
         guard let message = alMessage else { return }
         let viewController = navigationController?.visibleViewController as? ALKConversationViewController
-        if let vm = viewController?.viewModel, vm.contactId != nil || vm.channelKey != nil,
+        if let vm = viewController?.viewModel, (vm.contactId != nil || vm.channelKey != nil),
             let visibleController = self.navigationController?.visibleViewController,
             visibleController.isKind(of: ALKConversationViewController.self),
             isNewMessageForActiveThread(alMessage: alMessage, vm: vm) {

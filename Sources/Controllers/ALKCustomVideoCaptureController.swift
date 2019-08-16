@@ -311,7 +311,7 @@ final class ALKCustomVideoViewController: ALKBaseViewController, Localizable {
 
     private func enableCameraControl(inSec: Double) {
         let disT: DispatchTime = DispatchTime.now() + inSec
-        DispatchQueue.main.asyncAfter(deadline: disT) {
+        DispatchQueue.main.asyncAfter(deadline: disT, execute: {
             self.isUserControlEnable = true
         }
     }

@@ -118,7 +118,7 @@ final class ALKCustomCameraPreviewViewController: ALKBaseViewController, Localiz
 
     @objc private func doubleTapped(tap: UITapGestureRecognizer) {
         UIView.animate(withDuration: 0.5, animations: { [weak self, weak imageView] in
-            guard let self = self else { return }
+            guard let `self` = self else { return }
             guard let imageView = imageView else { return }
 
             let view = imageView

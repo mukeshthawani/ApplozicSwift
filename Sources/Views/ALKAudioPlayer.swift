@@ -10,7 +10,7 @@ import Applozic
 import AVFoundation
 import UIKit
 
-protocol ALKAudioPlayerProtocol: AnyObject {
+protocol ALKAudioPlayerProtocol: class {
     func audioPlaying(maxDuratation: CGFloat, atSec: CGFloat, lastPlayTrack: String)
     func audioStop(maxDuratation: CGFloat, lastPlayTrack: String)
     func audioPause(maxDuration: CGFloat, atSec: CGFloat, identifier: String)
@@ -18,9 +18,9 @@ protocol ALKAudioPlayerProtocol: AnyObject {
 
 final class ALKAudioPlayer {
     // sound file
-    private var audioData: NSData?
-    private var audioPlayer: AVAudioPlayer!
-    private var audioLastPlay: String = ""
+    fileprivate var audioData: NSData?
+    fileprivate var audioPlayer: AVAudioPlayer!
+    fileprivate var audioLastPlay: String = ""
 
     private var timer = Timer()
     var secLeft: CGFloat = 0.0
@@ -108,7 +108,7 @@ final class ALKAudioPlayer {
         return audioLastPlay
     }
 
-    @objc private func updateCounter() {
+    @objc fileprivate func updateCounter() {
         if secLeft <= 0 {
             secLeft = 0
             timer.invalidate()

@@ -97,7 +97,7 @@ class ALKFriendGenericListCell: ALKChatBaseCell<ALKMessageViewModel> {
         let buttonHeight = 35
         let baseHeight: CGFloat = 20
         let padding: CGFloat = 10
-        let totalButtonHeight: CGFloat = CGFloat(buttonHeight * template.count)
+        let totalButtonHeight: CGFloat = CGFloat(buttonHeight * (template.count))
         return baseHeight + totalButtonHeight + padding + ALKFriendMessageView.rowHeigh(viewModel: viewModel, widthNoPadding: UIScreen.main.bounds.width - 200) + 40
     }
 

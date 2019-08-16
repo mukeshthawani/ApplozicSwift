@@ -198,26 +198,26 @@ open class ALKConversationViewModel: NSObject, Localizable {
         return messageModels[indexPath.section]
     }
 
-    open func quickReplyDictionary(message: ALKMessageViewModel?, indexRow row: Int) -> [String: Any]? {
+    open func quickReplyDictionary(message: ALKMessageViewModel?, indexRow row: Int) -> Dictionary<String, Any>? {
         guard let metadata = message?.metadata else {
-            return [String: Any]()
+            return Dictionary<String, Any>()
         }
 
         let payload = metadata["payload"] as? String
 
         let data = payload?.data
-        var jsonArray: [[String: Any]]?
+        var jsonArray: [Dictionary<String, Any>]?
 
         do {
-            jsonArray = (try JSONSerialization.jsonObject(with: data!, options: .allowFragments) as? [[String: Any]])
+            jsonArray = (try JSONSerialization.jsonObject(with: data!, options: .allowFragments) as? [Dictionary<String, Any>])
             return jsonArray?[row]
         } catch let error as NSError {
             print(error)
         }
-        return [String: Any]()
+        return Dictionary<String, Any>()
     }
 
-    open func getSizeForItemAt(row _: Int, withData: [String: Any]) -> CGSize {
+    open func getSizeForItemAt(row _: Int, withData: Dictionary<String, Any>) -> CGSize {
         let size = (withData["title"] as? String)?.size(withAttributes: [NSAttributedString.Key.font: Font.normal(size: 14.0).font()])
         let newSize = CGSize(width: (size?.width)! + 46.0, height: 50.0)
         return newSize
@@ -419,8 +419,8 @@ open class ALKConversationViewModel: NSObject, Localizable {
             let fileUrl = URL(fileURLWithPath: jsonPath)
             let data = try Data(contentsOf: fileUrl, options: .mappedIfSafe)
             let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableContainers)
-            if let json = jsonResult as? [String: Any],
-                let templates = json["templates"] as? [Any] {
+            if let json = jsonResult as? Dictionary<String, Any>,
+                let templates = json["templates"] as? Array<Any> {
                 NSLog("Template json: ", json.description)
                 var templateModels: [ALKTemplateMessageModel] = []
                 for element in templates {
@@ -485,7 +485,7 @@ open class ALKConversationViewModel: NSObject, Localizable {
         }
 
         var sortedArray = filteredArray.filter {
-            !alMessageWrapper.contains(message: $0)
+            return !alMessageWrapper.contains(message: $0)
         }
         if sortedArray.count > 1 {
             sortedArray.sort { Int(truncating: $0.createdAtTime) < Int(truncating: $1.createdAtTime) }

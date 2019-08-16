@@ -55,5 +55,4 @@ final class ALKPreviewImageViewModel: NSObject, Localizable {
         } else if let successBlock = savingImagesuccessBlock {
             successBlock()
         }
-    }
-}
+} }

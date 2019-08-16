@@ -256,6 +256,7 @@ final class ALKCustomCameraViewController: ALKBaseViewController, AVCapturePhoto
                 guard let weakSelf = self else { return }
                 weakSelf.createScrollGallery(isGrant: isGrant)
             })
+            break
         // handle authorized status
         case .denied, .restricted:
             break
@@ -269,6 +270,7 @@ final class ALKCustomCameraViewController: ALKBaseViewController, AVCapturePhoto
                         guard let weakSelf = self else { return }
                         weakSelf.createScrollGallery(isGrant: isGrant)
                     })
+                    break
                 // as above
                 case .denied, .restricted:
                     break
@@ -505,9 +507,9 @@ final class ALKCustomCameraViewController: ALKBaseViewController, AVCapturePhoto
 
     private func createScrollGallery(isGrant: Bool) {
         if isGrant {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
                 self.previewGallery.reloadData()
-            }
+            })
         }
     }
 

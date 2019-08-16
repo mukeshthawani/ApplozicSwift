@@ -287,9 +287,9 @@ final class ALKCreateGroupViewController: ALKBaseViewController, Localizable {
 
         UIAlertController.presentDiscardAlert(onPresenter: navigationController, alertTitle: alertTitle, alertMessage: alertMessage, cancelTitle: cancelTitle, discardTitle: discardTitle,
                                               onlyForCondition: { () -> Bool in
-
-                                                  createGroupViewModel.groupName != createGroupViewModel.originalGroupName || cropedImage != nil
-
+                                                  (
+                                                      createGroupViewModel.groupName != createGroupViewModel.originalGroupName || cropedImage != nil
+                                                  )
         }) { [weak self] in
             guard let weakSelf = self else { return }
             _ = weakSelf.navigationController?.popViewController(animated: true)
