@@ -22,13 +22,14 @@ enum ALKCameraType {
 
 var camera = ALKCameraType.back
 
-protocol ALKCustomCameraProtocol {
+protocol ALKCustomCameraProtocol: class {
     func customCameraDidTakePicture(cropedImage: UIImage)
 }
 
+// swiftlint:disable:next type_body_length
 final class ALKCustomCameraViewController: ALKBaseViewController, AVCapturePhotoCaptureDelegate, Localizable {
     // delegate
-    var customCamDelegate: ALKCustomCameraProtocol!
+    weak var customCamDelegate: ALKCustomCameraProtocol?
     var camera = ALKCameraType.back
 
     // photo library
@@ -156,14 +157,15 @@ final class ALKCustomCameraViewController: ALKBaseViewController, AVCapturePhoto
         bracketSettings _: AVCaptureBracketedStillImageSettings?,
         error: Swift.Error?
     ) {
-        if let error = error { print(error) }
-        else if
-            let buffer = photoSampleBuffer,
+        if let error = error {
+            print(error)
+        } else if let buffer = photoSampleBuffer,
             let data = AVCapturePhotoOutput.jpegPhotoDataRepresentation(
                 forJPEGSampleBuffer: buffer,
                 previewPhotoSampleBuffer: nil
             ),
             let image = UIImage(data: data) {
+
             selectedImage = image
             switch cameraMode {
             case .cropOption:
@@ -256,7 +258,6 @@ final class ALKCustomCameraViewController: ALKBaseViewController, AVCapturePhoto
                 guard let weakSelf = self else { return }
                 weakSelf.createScrollGallery(isGrant: isGrant)
             })
-            break
         // handle authorized status
         case .denied, .restricted:
             break
@@ -270,7 +271,6 @@ final class ALKCustomCameraViewController: ALKBaseViewController, AVCapturePhoto
                         guard let weakSelf = self else { return }
                         weakSelf.createScrollGallery(isGrant: isGrant)
                     })
-                    break
                 // as above
                 case .denied, .restricted:
                     break

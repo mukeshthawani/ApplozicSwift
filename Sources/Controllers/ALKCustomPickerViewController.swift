@@ -92,9 +92,6 @@ class ALKCustomPickerViewController: ALKBaseViewController, Localizable {
         // handle authorized status
         case .denied, .restricted:
             break
-        // handle authorized status
-        case .denied, .restricted:
-            break
         // handle denied status
         case .notDetermined:
             // ask for permissions
@@ -134,7 +131,7 @@ class ALKCustomPickerViewController: ALKBaseViewController, Localizable {
             selectedRows = Array(repeating: 0, count: (allPhotos != nil) ? allPhotos.count : 0)
             DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
                 self.previewGallery.reloadData()
-            }
+            })
         }
     }
 
@@ -169,7 +166,7 @@ class ALKCustomPickerViewController: ALKBaseViewController, Localizable {
             exportSession!.outputURL = fileurl
             exportSession!.outputFileType = AVFileType.mp4 // file type encode goes here, you can change it for other types
 
-            exportSession!.exportAsynchronously() {
+            exportSession!.exportAsynchronously {
                 switch exportSession!.status {
                 case .completed:
                     print("Video exported successfully")

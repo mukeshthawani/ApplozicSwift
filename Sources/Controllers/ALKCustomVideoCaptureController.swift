@@ -12,7 +12,7 @@ import UIKit
 
 final class ALKCustomVideoViewController: ALKBaseViewController, Localizable {
     // delegate
-    var customCamDelegate: ALKCustomCameraProtocol!
+    weak var customCamDelegate: ALKCustomCameraProtocol?
     var camera = ALKCameraType.back
     var videoFileOutput = AVCaptureMovieFileOutput()
     var filePath: URL?
@@ -313,7 +313,7 @@ final class ALKCustomVideoViewController: ALKBaseViewController, Localizable {
         let disT: DispatchTime = DispatchTime.now() + inSec
         DispatchQueue.main.asyncAfter(deadline: disT, execute: {
             self.isUserControlEnable = true
-        }
+        })
     }
 
     // MARK: - Access to gallery images
