@@ -5,7 +5,7 @@
 //  Created by Shivam Pokhriyal on 18/01/19.
 //
 
-public protocol Tappable: class {
+public protocol Tappable: AnyObject {
     /// Called when the view is tapped
     ///
     /// - Parameters:

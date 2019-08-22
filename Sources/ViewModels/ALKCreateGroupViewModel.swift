@@ -9,7 +9,7 @@
 import Applozic
 import Foundation
 
-protocol ALKCreateGroupViewModelDelegate: class {
+protocol ALKCreateGroupViewModelDelegate: AnyObject {
     func membersFetched()
     func remove(at index: Int)
     func makeAdmin(at index: Int)

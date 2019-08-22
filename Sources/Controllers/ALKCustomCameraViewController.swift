@@ -22,7 +22,7 @@ enum ALKCameraType {
 
 var camera = ALKCameraType.back
 
-protocol ALKCustomCameraProtocol: class {
+protocol ALKCustomCameraProtocol: AnyObject {
     func customCameraDidTakePicture(cropedImage: UIImage)
 }
 
@@ -165,7 +165,6 @@ final class ALKCustomCameraViewController: ALKBaseViewController, AVCapturePhoto
                 previewPhotoSampleBuffer: nil
             ),
             let image = UIImage(data: data) {
-
             selectedImage = image
             switch cameraMode {
             case .cropOption:
@@ -507,9 +506,9 @@ final class ALKCustomCameraViewController: ALKBaseViewController, AVCapturePhoto
 
     private func createScrollGallery(isGrant: Bool) {
         if isGrant {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 self.previewGallery.reloadData()
-            })
+            }
         }
     }
 

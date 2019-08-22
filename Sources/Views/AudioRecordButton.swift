@@ -99,13 +99,13 @@ open class AudioRecordButton: UIButton {
 
         switch permissionStatus {
         case AVAudioSession.RecordPermission.undetermined:
-            soundSession.requestRecordPermission({ isGrant in
+            soundSession.requestRecordPermission { isGrant in
                 if isGrant {
                     isAllow = true
                 } else {
                     isAllow = false
                 }
-            })
+            }
         case AVAudioSession.RecordPermission.denied:
             // direct to settings...
             isAllow = false

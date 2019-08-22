@@ -147,7 +147,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         return view
     }()
 
-    var contentOffsetDictionary: Dictionary<AnyHashable, AnyObject>!
+    var contentOffsetDictionary: [AnyHashable: AnyObject]!
 
     public required init(configuration: ALKConfiguration) {
         super.init(configuration: configuration)
@@ -376,7 +376,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         } else {
             tableView.reloadData()
         }
-        contentOffsetDictionary = Dictionary<NSObject, AnyObject>()
+        contentOffsetDictionary = [NSObject: AnyObject]()
         print("id: ", viewModel.messageModels.first?.contactId as Any)
     }
 
@@ -1086,7 +1086,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         title: String,
         template: [[String: Any]],
         message: ALKMessageViewModel,
-        metadata: Dictionary<String, Any>?,
+        metadata: [String: Any]?,
         isButtonClickDisabled: Bool
     ) {
         print("\(title, index) quick reply button selected")
@@ -1611,7 +1611,7 @@ extension ALKConversationViewController: ALKShareLocationViewControllerDelegate 
             return
         }
         tableView.beginUpdates()
-        tableView.insertSections(IndexSet(integer: (newIndexPath.section)), with: .automatic)
+        tableView.insertSections(IndexSet(integer: newIndexPath.section), with: .automatic)
         tableView.endUpdates()
 
         // Not scrolling down without the delay

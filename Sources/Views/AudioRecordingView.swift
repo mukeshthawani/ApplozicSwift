@@ -9,7 +9,7 @@ import Foundation
 
 import AVFoundation
 
-public protocol ALKAudioRecorderViewProtocol: class {
+public protocol ALKAudioRecorderViewProtocol: AnyObject {
     func cancelAudioRecording()
 }
 

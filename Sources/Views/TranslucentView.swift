@@ -279,7 +279,7 @@ extension TranslucentView {
 
     open override func exchangeSubview(at index1: Int, withSubviewAt index2: Int) {
         if initComplete {
-            super.exchangeSubview(at: (index1 + 1), withSubviewAt: (index2 + 1))
+            super.exchangeSubview(at: index1 + 1, withSubviewAt: index2 + 1)
         } else {
             super.exchangeSubview(at: index1, withSubviewAt: index2)
         }

@@ -311,9 +311,9 @@ final class ALKCustomVideoViewController: ALKBaseViewController, Localizable {
 
     private func enableCameraControl(inSec: Double) {
         let disT: DispatchTime = DispatchTime.now() + inSec
-        DispatchQueue.main.asyncAfter(deadline: disT, execute: {
+        DispatchQueue.main.asyncAfter(deadline: disT) {
             self.isUserControlEnable = true
-        })
+        }
     }
 
     // MARK: - Access to gallery images

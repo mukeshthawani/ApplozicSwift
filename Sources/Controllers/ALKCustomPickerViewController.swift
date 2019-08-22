@@ -129,9 +129,9 @@ class ALKCustomPickerViewController: ALKBaseViewController, Localizable {
     private func createScrollGallery(isGrant: Bool) {
         if isGrant {
             selectedRows = Array(repeating: 0, count: (allPhotos != nil) ? allPhotos.count : 0)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 self.previewGallery.reloadData()
-            })
+            }
         }
     }
 

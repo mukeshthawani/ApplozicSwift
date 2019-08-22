@@ -9,7 +9,7 @@
 import Applozic
 import Foundation
 
-protocol ALKConversationListViewModelDelegate: class {
+protocol ALKConversationListViewModelDelegate: AnyObject {
     func startedLoading()
     func listUpdated()
     func rowUpdatedAt(position: Int)
@@ -20,7 +20,7 @@ protocol ALKConversationListViewModelDelegate: class {
 
  A concrete class that conforms to this protocol is provided in the SDK. See `ALKConversationListViewModel`.
  */
-public protocol ALKConversationListViewModelProtocol: class {
+public protocol ALKConversationListViewModelProtocol: AnyObject {
     /**
      This method is returns the number of sections in the tableView.
      - Returns: The number of sections in the tableView

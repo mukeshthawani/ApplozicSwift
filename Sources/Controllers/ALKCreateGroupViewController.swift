@@ -10,7 +10,7 @@ import Applozic
 import Kingfisher
 import UIKit
 
-protocol ALKCreateGroupChatAddFriendProtocol: class {
+protocol ALKCreateGroupChatAddFriendProtocol: AnyObject {
     func createGroupGetFriendInGroupList(
         friendsSelected: [ALKFriendViewModel],
         groupName: String,
@@ -305,7 +305,8 @@ final class ALKCreateGroupViewController: ALKBaseViewController, Localizable {
             cancelTitle: cancelTitle,
             discardTitle: discardTitle,
             onlyForCondition: nameOrImageChange,
-            lastAction: popVC)
+            lastAction: popVC
+        )
     }
 
     private func changeUserRole(at index: Int, _ role: NSNumber) {

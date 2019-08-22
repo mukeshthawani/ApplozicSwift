@@ -8,7 +8,7 @@
 
 import Kingfisher
 import UIKit
-protocol ALKAddParticipantProtocol: class {
+protocol ALKAddParticipantProtocol: AnyObject {
     func addParticipantAtIndex(atIndex: IndexPath)
     func profileTappedAt(index: IndexPath)
 }
