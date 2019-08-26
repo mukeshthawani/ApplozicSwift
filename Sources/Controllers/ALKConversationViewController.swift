@@ -386,7 +386,9 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         super.viewDidLoad()
         setupConstraints()
         autocompletionView.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
-        chatBar.setup(autocompletionView, withPrefex: "/")
+        chatBar.setupAutoCompletion(autocompletionView)
+        chatBar.registerPrefix(prefix: "/", attributes: [:])
+        chatBar.registerPrefix(prefix: "@", attributes: [:])
         setRichMessageKitTheme()
         setupProfanityFilter()
     }
@@ -674,6 +676,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         if viewModel.showPoweredByMessage() { chatBar.showPoweredByMessage() }
         chatBar.accessibilityIdentifier = "chatBar"
         chatBar.setComingSoonDelegate(delegate: view)
+        chatBar.autocompletionDelegate = self
         chatBar.action = { [weak self] action in
 
             guard let weakSelf = self else {
@@ -2003,6 +2006,30 @@ extension ALKConversationViewController: ALAlertButtonClickProtocol {
             muteConversationVC.updateTitleAndMessage(title, message: message)
             muteConversationVC.modalPresentationStyle = .overCurrentContext
             present(muteConversationVC, animated: true, completion: nil)
+        }
+    }
+}
+
+// TEMP: Move it to a different file
+//
+// Override this in the agent app and if you want to support
+// other prefixes then call super.
+extension ALKConversationViewController: AutoCompletionDelegate {
+    public func didMatch(prefix: String, message: String) {
+        guard prefix == "@" else { return }
+        viewModel.fetchGroupMembers { items in
+            // update auto completion items based on the prefix
+            if message.isEmpty {
+                self.chatBar.filteredAutocompletionItems = items
+            } else {
+                self.chatBar.filteredAutocompletionItems = items.filter { $0.key.lowercased().contains(message) }
+            }
+
+            // then reload and show the suggestion view
+            UIView.performWithoutAnimation {
+                self.chatBar.reloadAutoCompletionView()
+            }
+            self.chatBar.showAutoCompletionView()
         }
     }
 }

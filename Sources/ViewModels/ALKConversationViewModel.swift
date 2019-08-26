@@ -1176,6 +1176,28 @@ open class ALKConversationViewModel: NSObject, Localizable {
         })
     }
 
+    func fetchGroupMembers(completion: @escaping ([AutoCompleteItem]) -> Void) {
+        guard let channelKey = channelKey else {
+            return
+        }
+        ALChannelDBService().fetchChannelMembersAsync(withChannelKey: channelKey) { members in
+            guard let members = members as? [String], !members.isEmpty else {
+                return
+            }
+            let alContactDbService = ALContactDBService()
+            let alContacts = members.map {
+                alContactDbService.loadContact(byKey: "userId", value: $0)
+            }
+
+            let items =
+                alContacts
+                    .filter { $0 != nil && $0?.userId != ALUserDefaultsHandler.getUserId() }
+                    .map { AutoCompleteItem(key: $0!.displayName ?? $0!.userId, content: $0!.displayName ?? $0!.userId) }
+            completion(items)
+        }
+    }
+
+
     // MARK: - Private Methods
 
     private func updateGroupInfo(

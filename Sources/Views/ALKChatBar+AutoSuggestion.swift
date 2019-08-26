@@ -42,23 +42,3 @@ extension ALKChatBar: UITableViewDataSource, UITableViewDelegate {
         hideAutoCompletionView()
     }
 }
-
-extension ALKChatBar {
-    func itemsContaining(_ text: String, in list: [AutoCompleteItem]) -> [AutoCompleteItem] {
-        return list.filter { $0.key.lowercased().contains(text) }
-    }
-
-    /// This will show items relevant to the text entered in quick reply view.
-    /// NOTE: Pass everything other than the prefix, caller should consume the prefix.
-    func updateAutocompletionFor(text: String) {
-        if text.isEmpty {
-            filteredAutocompletionItems = autoCompletionItems
-        } else {
-            filteredAutocompletionItems = itemsContaining(text, in: autoCompletionItems)
-        }
-        UIView.performWithoutAnimation {
-            autocompletionView.reloadData()
-        }
-        showAutoCompletionView()
-    }
-}

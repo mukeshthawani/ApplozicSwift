@@ -20,6 +20,10 @@ public struct AutoCompleteItem {
     }
 }
 
+public protocol AutoCompletionDelegate: AnyObject {
+    func didMatch(prefix: String, message: String)
+}
+
 // swiftlint:disable:next type_body_length
 open class ALKChatBar: UIView, Localizable {
     var configuration: ALKConfiguration!
@@ -29,6 +33,7 @@ open class ALKChatBar: UIView, Localizable {
     }
 
     public var isMicButtonHidden: Bool!
+    public weak var autocompletionDelegate: AutoCompletionDelegate?
 
     public enum ButtonMode {
         case send
@@ -222,6 +227,20 @@ open class ALKChatBar: UIView, Localizable {
         return attachmentStack
     }()
 
+    fileprivate var textViewHeighConstrain: NSLayoutConstraint?
+    fileprivate let textViewHeigh: CGFloat = 40.0
+    fileprivate let textViewHeighMax: CGFloat = 102.2 + 8.0
+
+    fileprivate var textViewTrailingWithSend: NSLayoutConstraint?
+    fileprivate var textViewTrailingWithMic: NSLayoutConstraint?
+    fileprivate var autoCompletionViewHeightConstraint: NSLayoutConstraint?
+
+    public var autoCompletionItems = [AutoCompleteItem]()
+    var filteredAutocompletionItems = [AutoCompleteItem]()
+
+    private var autocompletionPrefixes: [String] = []
+    private var autocompletionPrefixAttributes: [String: [NSAttributedString.Key: Any]] = [:]
+
     private enum ConstraintIdentifier: String {
         case mediaBackgroudViewHeight
         case poweredByMessageHeight
@@ -291,13 +310,17 @@ open class ALKChatBar: UIView, Localizable {
         updateMediaViewVisibility()
     }
 
-    func setup(_ tableview: UITableView, withPrefex prefix: String) {
+    func setupAutoCompletion(_ tableview: UITableView) {
         autocompletionView = tableview
         autocompletionView.dataSource = self
         autocompletionView.delegate = self
         autoCompletionViewHeightConstraint = autocompletionView.heightAnchor.constraint(equalToConstant: 0)
         autoCompletionViewHeightConstraint?.isActive = true
-        self.prefix = prefix
+    }
+
+    func registerPrefix(prefix: String, attributes: [NSAttributedString.Key: Any]) {
+        autocompletionPrefixes.append(prefix)
+        autocompletionPrefixAttributes[prefix] = attributes
     }
 
     func setComingSoonDelegate(delegate: UIView) {
@@ -347,19 +370,6 @@ open class ALKChatBar: UIView, Localizable {
             isNeedInitText = false
         }
     }
-
-    fileprivate var textViewHeighConstrain: NSLayoutConstraint?
-    fileprivate let textViewHeigh: CGFloat = 40.0
-    fileprivate let textViewHeighMax: CGFloat = 102.2 + 8.0
-
-    fileprivate var textViewTrailingWithSend: NSLayoutConstraint?
-    fileprivate var textViewTrailingWithMic: NSLayoutConstraint?
-    fileprivate var autoCompletionViewHeightConstraint: NSLayoutConstraint?
-
-    public var autoCompletionItems = [AutoCompleteItem]()
-    var filteredAutocompletionItems = [AutoCompleteItem]()
-
-    public var prefix: String?
 
     // swiftlint:disable:next function_body_length
     private func setupConstraints(
@@ -683,8 +693,21 @@ extension ALKChatBar: UITextViewDelegate {
         placeHolder.alpha = textView.text.isEmpty ? 1.0 : 0.0
 
         toggleButtonInChatBar(hide: textView.text.isEmpty)
-        if showAutosuggestionsForText(textView.text, withPrefix: prefix ?? "") {
-            updateAutocompletionFor(text: String(textView.text.dropFirst()))
+
+        func prefixInText() -> String {
+            var matchedPrefix = ""
+            for prefix in autocompletionPrefixes {
+                if textStartsWithPrefix(textView.text, prefix: prefix) {
+                    matchedPrefix = prefix
+                    break
+                }
+            }
+            return matchedPrefix
+        }
+        let matchedPrefix = prefixInText()
+        if !matchedPrefix.isEmpty {
+            // Call delegate and get items
+            autocompletionDelegate?.didMatch(prefix: matchedPrefix, message: String(textView.text.dropFirst()))
         } else {
             hideAutoCompletionView()
         }
@@ -750,6 +773,10 @@ extension ALKChatBar: UITextViewDelegate {
         textView.reloadInputViews()
     }
 
+    func reloadAutoCompletionView() {
+        autocompletionView.reloadData()
+    }
+
     func showAutoCompletionView() {
         let contentHeight = autocompletionView.contentSize.height
 
@@ -762,7 +789,7 @@ extension ALKChatBar: UITextViewDelegate {
         autoCompletionViewHeightConstraint?.constant = 0
     }
 
-    func showAutosuggestionsForText(_ text: String, withPrefix prefix: String) -> Bool {
+    func textStartsWithPrefix(_ text: String, prefix: String) -> Bool {
         guard !prefix.isEmpty, text.starts(with: prefix) else { return false }
         if text.count > 1, text[1] == " " { return false }
         return true
