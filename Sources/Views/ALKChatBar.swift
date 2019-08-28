@@ -238,8 +238,16 @@ open class ALKChatBar: UIView, Localizable {
     public var autoCompletionItems = [AutoCompleteItem]()
     var filteredAutocompletionItems = [AutoCompleteItem]()
 
-    private var autocompletionPrefixes: [String] = []
+    private var autocompletionPrefixes: Set<String> = []
     private var autocompletionPrefixAttributes: [String: [NSAttributedString.Key: Any]] = [:]
+
+    // TODO: move this to AutoSuggestionController
+    //
+    // Prefix and selected item pair
+    typealias Selection = (prefix: String, range: Range<String.Index>,item: AutoCompleteItem?)
+    var selection: Selection?
+    /// A key used for referencing which substrings were autocompletes
+    private let autoCompleteKey = NSAttributedString.Key.init("com.applozicswift.autocompletekey")
 
     private enum ConstraintIdentifier: String {
         case mediaBackgroudViewHeight
@@ -319,7 +327,7 @@ open class ALKChatBar: UIView, Localizable {
     }
 
     func registerPrefix(prefix: String, attributes: [NSAttributedString.Key: Any]) {
-        autocompletionPrefixes.append(prefix)
+        autocompletionPrefixes.insert(prefix)
         autocompletionPrefixAttributes[prefix] = attributes
     }
 
@@ -683,7 +691,18 @@ extension ALKChatBar: UITextViewDelegate {
             return true
         }
 
-        text = text.replacingCharacters(in: range, with: string) as NSString
+        // check if deleting an autocomplete item, if yes then
+        // remove full item in one go and clear the attributes
+        // TODO: move this part to autosuggestioncontroller
+        //
+        // range.length == 1: Remove single character
+        // range.lowerBound < textView.selectedRange.lowerBound: Ignore trying to delete
+        //      the substring if the user is already doing so
+        if range.length == 1, range.lowerBound < textView.selectedRange.lowerBound {
+
+        }
+
+//        text = text.replacingCharacters(in: range, with: string) as NSString
         updateTextViewHeight(textView: textView, text: text as String)
         return true
     }
@@ -706,6 +725,13 @@ extension ALKChatBar: UITextViewDelegate {
         }
         let matchedPrefix = prefixInText()
         if !matchedPrefix.isEmpty {
+
+            // get the range and pass it
+            // Reset it when text gets deleted(in shouldChangeTextIn)
+            let messageWithoutPrefix = textView.text.dropFirst()
+            let textRange = messageWithoutPrefix.startIndex..<messageWithoutPrefix.endIndex
+            
+            selection = (matchedPrefix, textRange, nil)
             // Call delegate and get items
             autocompletionDelegate?.didMatch(prefix: matchedPrefix, message: String(textView.text.dropFirst()))
         } else {
@@ -793,6 +819,23 @@ extension ALKChatBar: UITextViewDelegate {
         guard !prefix.isEmpty, text.starts(with: prefix) else { return false }
         if text.count > 1, text[1] == " " { return false }
         return true
+    }
+
+    // TODO: Move this to AutosuggestionController
+    func insert(selection: Selection) {
+        var attributes = textView.typingAttributes
+        if let prefixAttributes = autocompletionPrefixAttributes[selection.prefix] {
+             // pass prefix attributes for the range and override old value if present
+            attributes.merge(prefixAttributes) { return $1 }
+        }
+        attributes[autoCompleteKey] = selection.item?.key
+        let text = NSAttributedString(string: selection.item?.content ?? "", attributes: attributes)
+
+        // If we replace the text here then it resizes the textview incorrectly.
+        // That's why first resetting the text and then inserting the item content.
+        // Also, to prevent keyboard autocorrect from cloberring the insert.
+        textView.attributedText = NSAttributedString()
+        textView.attributedText = text
     }
 }
 

@@ -1176,7 +1176,7 @@ open class ALKConversationViewModel: NSObject, Localizable {
         })
     }
 
-    func fetchGroupMembers(completion: @escaping ([AutoCompleteItem]) -> Void) {
+    func fetchGroupMembersForAutocompletion(completion: @escaping ([AutoCompleteItem]) -> Void) {
         guard let channelKey = channelKey else {
             return
         }

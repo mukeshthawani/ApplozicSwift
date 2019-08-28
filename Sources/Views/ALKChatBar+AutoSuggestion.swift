@@ -36,8 +36,10 @@ extension ALKChatBar: UITableViewDataSource, UITableViewDelegate {
 
         // If we replace the text here then it resizes the textview incorrectly.
         // That's why first resetting the text and then inserting the item content.
-        textView.text = ""
-        textView.insertText(text)
+//        textView.text = ""
+//        textView.insertText(text)
+        guard let selection = selection else { return }
+        insert(selection: (selection.0, selection.1, filteredAutocompletionItems[indexPath.row]))
         updateTextViewHeight(textView: textView, text: text)
         hideAutoCompletionView()
     }

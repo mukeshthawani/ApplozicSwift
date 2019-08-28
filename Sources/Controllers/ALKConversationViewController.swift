@@ -388,7 +388,11 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         autocompletionView.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
         chatBar.setupAutoCompletion(autocompletionView)
         chatBar.registerPrefix(prefix: "/", attributes: [:])
-        chatBar.registerPrefix(prefix: "@", attributes: [:])
+        chatBar.registerPrefix(prefix: "@", attributes: [
+            .font: UIFont.preferredFont(forTextStyle: .body),
+            .foregroundColor: UIColor.red,
+            .backgroundColor: UIColor.red.withAlphaComponent(0.1)
+            ])
         setRichMessageKitTheme()
         setupProfanityFilter()
     }
@@ -737,6 +741,22 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                     button.isUserInteractionEnabled = true
                     return
                 }
+                // TEMP: check if usernames are present. If yes then add them to the metadata
+                // and maybe we can remove it from the text.
+                // We can pass a list of userIds and their postion in the metadata.
+                // Message renderer will use this info and add the display names(with color)
+                // in the message text.
+                //
+                // Note: passing the position may not correct as it will change based on the
+                // display name. So, we should find userIds with @ sign in the text and then
+                // replace them with @+display_name.
+                //
+                // Also, we can add a recognizer on usernames which will
+                // be used to send a notification outside(for now).
+                //
+                // Also, we need a add a key value in the message metadata to
+                // identify if this message has member mentions.
+                // and pass the userids with a Key for the notifications.
                 weakSelf.isJustSent = true
                 print("About to send this message: ", message)
                 weakSelf.viewModel.send(message: message, isOpenGroup: weakSelf.viewModel.isOpenGroup, metadata: self?.configuration.messageMetadata)
@@ -2017,7 +2037,11 @@ extension ALKConversationViewController: ALAlertButtonClickProtocol {
 extension ALKConversationViewController: AutoCompletionDelegate {
     public func didMatch(prefix: String, message: String) {
         guard prefix == "@" else { return }
-        viewModel.fetchGroupMembers { items in
+        // TODO: pass userID as key instead of name
+        // And create cell that just uses content
+        // Also will have to remove the usage of autocompleteitem
+        // as we have a complex and different DS for different usecases.
+        viewModel.fetchGroupMembersForAutocompletion { items in
             // update auto completion items based on the prefix
             if message.isEmpty {
                 self.chatBar.filteredAutocompletionItems = items
