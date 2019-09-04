@@ -244,7 +244,10 @@ open class ALKChatBar: UIView, Localizable {
     // TODO: move this to AutoSuggestionController
     //
     // Prefix and selected item pair
-    typealias Selection = (prefix: String, range: Range<String.Index>,item: AutoCompleteItem?)
+    typealias Selection = (
+        prefix: String,
+        range: NSRange,
+        word: String)
     var selection: Selection?
     /// A key used for referencing which substrings were autocompletes
     private let autoCompleteKey = NSAttributedString.Key.init("com.applozicswift.autocompletekey")
@@ -713,27 +716,29 @@ extension ALKChatBar: UITextViewDelegate {
 
         toggleButtonInChatBar(hide: textView.text.isEmpty)
 
-        func prefixInText() -> String {
-            var matchedPrefix = ""
+        func prefixIn(text: String) -> String? {
             for prefix in autocompletionPrefixes {
-                if textStartsWithPrefix(textView.text, prefix: prefix) {
-                    matchedPrefix = prefix
-                    break
+                if textStartsWithPrefix(text, prefix: prefix) {
+                    return prefix
                 }
             }
-            return matchedPrefix
+            return nil
         }
-        let matchedPrefix = prefixInText()
-        if !matchedPrefix.isEmpty {
+
+        if let text = textView.text, let matchedPrefix = prefixIn(text: text) {
+
+            // TODO: handle whitespace characters when calling didMatch.
+            // Maybe only call only call when valid chars are present and there
+            // is no gap
 
             // get the range and pass it
             // Reset it when text gets deleted(in shouldChangeTextIn)
-            let messageWithoutPrefix = textView.text.dropFirst()
-            let textRange = messageWithoutPrefix.startIndex..<messageWithoutPrefix.endIndex
-            
-            selection = (matchedPrefix, textRange, nil)
+            let messageWithoutPrefix = text.dropFirst()
+            let wordRange = messageWithoutPrefix.startIndex..<messageWithoutPrefix.endIndex
+            let range = NSRange(wordRange, in: text)
+            selection = (matchedPrefix, range, String(messageWithoutPrefix))
             // Call delegate and get items
-            autocompletionDelegate?.didMatch(prefix: matchedPrefix, message: String(textView.text.dropFirst()))
+            autocompletionDelegate?.didMatch(prefix: matchedPrefix, message: String(messageWithoutPrefix))
         } else {
             hideAutoCompletionView()
         }
@@ -822,20 +827,34 @@ extension ALKChatBar: UITextViewDelegate {
     }
 
     // TODO: Move this to AutosuggestionController
-    func insert(selection: Selection) {
-        var attributes = textView.typingAttributes
+    func insert(item: AutoCompleteItem, at insertionRange: NSRange, replace selection: Selection) {
+        let defaultAttributes = textView.typingAttributes
+        var newAttributes = defaultAttributes
         if let prefixAttributes = autocompletionPrefixAttributes[selection.prefix] {
              // pass prefix attributes for the range and override old value if present
-            attributes.merge(prefixAttributes) { return $1 }
+            newAttributes.merge(prefixAttributes) { return $1 }
         }
-        attributes[autoCompleteKey] = selection.item?.key
-        let text = NSAttributedString(string: selection.item?.content ?? "", attributes: attributes)
+        newAttributes[autoCompleteKey] = item.key
+        // TODO: add a param to determine whether or not the
+        // prfix should be appended.
+        let insertionItemString = NSAttributedString(
+            string: selection.prefix + item.content,
+            attributes: newAttributes)
+
+        // TODO: use this range var after adding prefix param
+        // let insertionRange = NSRange(location: range.location+prefix.length, length: range.length)
+
+        let newAttributedText = textView.attributedText.replacingCharacters(
+            in: insertionRange,
+            with: insertionItemString)
+        // TODO: add space param if space should be added in the end
+        newAttributedText.append(NSAttributedString(string: " ", attributes: defaultAttributes))
 
         // If we replace the text here then it resizes the textview incorrectly.
         // That's why first resetting the text and then inserting the item content.
         // Also, to prevent keyboard autocorrect from cloberring the insert.
         textView.attributedText = NSAttributedString()
-        textView.attributedText = text
+        textView.attributedText = newAttributedText
     }
 }
 
