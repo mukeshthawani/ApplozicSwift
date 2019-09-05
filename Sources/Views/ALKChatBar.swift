@@ -731,11 +731,10 @@ extension ALKChatBar: UITextViewDelegate {
             // Maybe only call only call when valid chars are present and there
             // is no gap
 
-            // get the range and pass it
-            // Reset it when text gets deleted(in shouldChangeTextIn)
-            let messageWithoutPrefix = text.dropFirst()
-            let wordRange = messageWithoutPrefix.startIndex..<messageWithoutPrefix.endIndex
-            let range = NSRange(wordRange, in: text)
+            let messageWithoutPrefix = (text as NSString).substring(from: matchedPrefix.utf16.count)
+
+            let selectionRange = text.startIndex..<text.endIndex
+            let range = NSRange(selectionRange, in: text)
             selection = (matchedPrefix, range, String(messageWithoutPrefix))
             // Call delegate and get items
             autocompletionDelegate?.didMatch(prefix: matchedPrefix, message: String(messageWithoutPrefix))
@@ -841,8 +840,8 @@ extension ALKChatBar: UITextViewDelegate {
             string: selection.prefix + item.content,
             attributes: newAttributes)
 
-        // TODO: use this range var after adding prefix param
-        // let insertionRange = NSRange(location: range.location+prefix.length, length: range.length)
+        // TODO: Handle prefix param
+//         let insertionRange = NSRange(location: range.location+prefix.length, length: range.length)
 
         let newAttributedText = textView.attributedText.replacingCharacters(
             in: insertionRange,

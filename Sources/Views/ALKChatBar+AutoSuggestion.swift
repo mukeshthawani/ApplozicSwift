@@ -42,6 +42,11 @@ extension ALKChatBar: UITableViewDataSource, UITableViewDelegate {
 //        textView.text = ""
 //        textView.insertText(text)
         guard let selection = selection else { return }
+        // TODO: handle the case when prefix should be removed. In that case
+        // we don't have to add anything extra in the location but length will
+        // increase
+        // TODO: use this
+//        let insertionRange = NSRange(location: selection.range.location, length: selection.word.utf16.count)
         insert(item: item, at: selection.range, replace: selection)
         updateTextViewHeight(textView: textView, text: item.content)
         hideAutoCompletionView()
