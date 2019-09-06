@@ -702,7 +702,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
             switch action {
             case let .sendText(button, message):
 
-                if message.count < 1 {
+                if message.string.count < 1 {
                     return
                 }
 
@@ -711,7 +711,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
 
                 weakSelf.chatBar.clear()
 
-                if let profanityFilter = weakSelf.profanityFilter, profanityFilter.containsRestrictedWords(text: message) {
+                if let profanityFilter = weakSelf.profanityFilter, profanityFilter.containsRestrictedWords(text: message.string) {
                     let profanityTitle = weakSelf.localizedString(
                         forKey: "profaneWordsTitle",
                         withDefaultValue: SystemMessage.Warning.profaneWordsTitle,
@@ -741,25 +741,21 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                     button.isUserInteractionEnabled = true
                     return
                 }
-                // TEMP: check if usernames are present. If yes then add them to the metadata
-                // and maybe we can remove it from the text.
-                // We can pass a list of userIds and their postion in the metadata.
-                // Message renderer will use this info and add the display names(with color)
-                // in the message text.
-                //
-                // Note: passing the position may not correct as it will change based on the
-                // display name. So, we should find userIds with @ sign in the text and then
-                // replace them with @+display_name.
-                //
-                // Also, we can add a recognizer on usernames which will
-                // be used to send a notification outside(for now).
-                //
-                // Also, we need a add a key value in the message metadata to
-                // identify if this message has member mentions.
-                // and pass the userids with a Key for the notifications.
+
+                var messageMetadata = self?.configuration.messageMetadata
+                let mentionHandler = MessageMentionHandler(message: message)
+                var messageToSend = message.string
+                if mentionHandler.containsAutosuggestions() {
+
+                    messageToSend = mentionHandler.replaceMentionsWithKeys()
+                    let metadataForMentions = mentionHandler.metadataForMentions() ?? [:]
+                    // In case of a key match using the value set in config
+                    messageMetadata = (messageMetadata ?? [:])
+                        .merging(metadataForMentions) { (current, _) in current }
+                }
                 weakSelf.isJustSent = true
-                print("About to send this message: ", message)
-                weakSelf.viewModel.send(message: message, isOpenGroup: weakSelf.viewModel.isOpenGroup, metadata: self?.configuration.messageMetadata)
+                print("About to send this message: ", messageToSend)
+                weakSelf.viewModel.send(message: messageToSend, isOpenGroup: weakSelf.viewModel.isOpenGroup, metadata: messageMetadata)
                 button.isUserInteractionEnabled = true
             case .chatBarTextChange:
 

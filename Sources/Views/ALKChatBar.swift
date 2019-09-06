@@ -14,6 +14,10 @@ public struct AutoCompleteItem {
     var key: String
     var content: String
 
+    /// A key used for referencing which substrings were autocompletes
+    static let attributesKey = NSAttributedString.Key.init("com.applozicswift.autocompletekey")
+
+
     public init(key: String, content: String) {
         self.key = key
         self.content = content
@@ -41,7 +45,7 @@ open class ALKChatBar: UIView, Localizable {
     }
 
     public enum ActionType {
-        case sendText(UIButton, String)
+        case sendText(UIButton, NSAttributedString)
         case chatBarTextBeginEdit
         case chatBarTextChange(UIButton)
         case sendVoice(NSData)
@@ -249,8 +253,6 @@ open class ALKChatBar: UIView, Localizable {
         range: NSRange,
         word: String)
     var selection: Selection?
-    /// A key used for referencing which substrings were autocompletes
-    private let autoCompleteKey = NSAttributedString.Key.init("com.applozicswift.autocompletekey")
 
     private enum ConstraintIdentifier: String {
         case mediaBackgroudViewHeight
@@ -262,9 +264,11 @@ open class ALKChatBar: UIView, Localizable {
     @objc func tapped(button: UIButton) {
         switch button {
         case sendButton:
-            let text = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
-            if text.lengthOfBytes(using: .utf8) > 0 {
-                action?(.sendText(button, text))
+//            let text = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            // TODO: remove whitespace and new lines in action handler side
+            let attributedText = textView.attributedText ?? NSAttributedString(string: textView.text)
+            if attributedText.string.lengthOfBytes(using: .utf8) > 0 {
+                action?(.sendText(button, attributedText))
             }
         case plusButton:
             action?(.more(button))
@@ -833,7 +837,8 @@ extension ALKChatBar: UITextViewDelegate {
              // pass prefix attributes for the range and override old value if present
             newAttributes.merge(prefixAttributes) { return $1 }
         }
-        newAttributes[autoCompleteKey] = item.key
+        // prefix to identify which autocomplete is present
+        newAttributes[AutoCompleteItem.attributesKey] = selection.prefix + item.key
         // TODO: add a param to determine whether or not the
         // prfix should be appended.
         let insertionItemString = NSAttributedString(
