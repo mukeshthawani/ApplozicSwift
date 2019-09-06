@@ -1192,7 +1192,7 @@ open class ALKConversationViewModel: NSObject, Localizable {
             let items =
                 alContacts
                     .filter { $0 != nil && $0?.userId != ALUserDefaultsHandler.getUserId() }
-                    .map { AutoCompleteItem(key: $0!.displayName ?? $0!.userId, content: $0!.displayName ?? $0!.userId) }
+                    .map { AutoCompleteItem(key: $0!.userId, content: $0!.displayName ?? $0!.userId) }
             completion(items)
         }
     }

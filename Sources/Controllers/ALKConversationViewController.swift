@@ -2032,8 +2032,7 @@ extension ALKConversationViewController: ALAlertButtonClickProtocol {
 // other prefixes then call super.
 extension ALKConversationViewController: AutoCompletionDelegate {
     public func didMatch(prefix: String, message: String) {
-        guard prefix == "@" else { return }
-        // TODO: pass userID as key instead of name
+        guard prefix == MessageMentionHandler.mentionSymbol else { return }
         // And create cell that just uses content
         // Also will have to remove the usage of autocompleteitem
         // as we have a complex and different DS for different usecases.
@@ -2042,7 +2041,7 @@ extension ALKConversationViewController: AutoCompletionDelegate {
             if message.isEmpty {
                 self.chatBar.filteredAutocompletionItems = items
             } else {
-                self.chatBar.filteredAutocompletionItems = items.filter { $0.key.lowercased().contains(message) }
+                self.chatBar.filteredAutocompletionItems = items.filter { $0.content.lowercased().contains(message) }
             }
 
             // then reload and show the suggestion view

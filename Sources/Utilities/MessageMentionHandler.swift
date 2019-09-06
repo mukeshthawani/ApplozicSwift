@@ -15,7 +15,7 @@ struct MessageMentionHandler {
     }
 
     typealias Mention = (word: String, range: NSRange)
-    let mentionSymbol = "@"
+    static let mentionSymbol = "@"
 
     let message: NSAttributedString
 
@@ -39,7 +39,7 @@ struct MessageMentionHandler {
         guard !allMentions.isEmpty else { return nil }
         // all usernames for notification
         let userIdString = allMentions
-            .reduce("") { $0 + "," + $1.word.dropFirst(mentionSymbol.count) }
+            .reduce("") { $0 + (!$0.isEmpty ? ",":"") + $1.word.dropFirst(MessageMentionHandler.mentionSymbol.count) }
         var metadata: [String: Any] = [MetadataKey.notification: userIdString]
 
         // key-value for mentions
@@ -59,7 +59,7 @@ struct MessageMentionHandler {
     private func mentionsInMessage() -> [Mention] {
         var allMentions: [Mention] = []
         message.enumerateAttribute(AutoCompleteItem.attributesKey, in: messageRange, options: []) { (value, keyRange, _) in
-            if let value = value as? String, value.starts(with: mentionSymbol) {
+            if let value = value as? String, value.starts(with: MessageMentionHandler.mentionSymbol) {
                 allMentions.append((value, keyRange))
             }
         }
