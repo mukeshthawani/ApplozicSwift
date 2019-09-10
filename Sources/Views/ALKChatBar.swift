@@ -714,37 +714,52 @@ extension ALKChatBar: UITextViewDelegate {
         return true
     }
 
+    public func textViewDidChangeSelection(_ textView: UITextView) {
+        guard let result = textView.find(prefixes: autocompletionPrefixes) else {
+            hideAutoCompletionView()
+            return
+        }
+
+        selection = (result.prefix, result.range, String(result.word.dropFirst(result.prefix.count)))
+        // Call delegate and get items
+        autocompletionDelegate?.didMatch(prefix: result.prefix, message: String(result.word.dropFirst(result.prefix.count)))
+    }
+
     public func textViewDidChange(_ textView: UITextView) {
         placeHolder.isHidden = !textView.text.isEmpty
         placeHolder.alpha = textView.text.isEmpty ? 1.0 : 0.0
 
         toggleButtonInChatBar(hide: textView.text.isEmpty)
 
-        func prefixIn(text: String) -> String? {
-            for prefix in autocompletionPrefixes {
-                if textStartsWithPrefix(text, prefix: prefix) {
-                    return prefix
-                }
-            }
-            return nil
-        }
-
-        if let text = textView.text, let matchedPrefix = prefixIn(text: text) {
+//        func prefixIn(text: String) -> String? {
+//            for prefix in autocompletionPrefixes {
+//                if textStartsWithPrefix(text, prefix: prefix) {
+//                    return prefix
+//                }
+//            }
+//            return nil
+//        }
+//
+//
+//        if let text = textView.text, let matchedPrefix = prefixIn(text: text) {
 
             // TODO: handle whitespace characters when calling didMatch.
             // Maybe only call only call when valid chars are present and there
-            // is no gap
+            // is no gap.
+            // Also, it is getting called everytime when a text is changed
+            // and the text contains @ in the start. Use selection to
+            // check not the whole text
 
-            let messageWithoutPrefix = (text as NSString).substring(from: matchedPrefix.utf16.count)
-
-            let selectionRange = text.startIndex..<text.endIndex
-            let range = NSRange(selectionRange, in: text)
-            selection = (matchedPrefix, range, String(messageWithoutPrefix))
+//            let messageWithoutPrefix = (text as NSString).substring(from: matchedPrefix.utf16.count)
+//
+//            let selectionRange = text.startIndex..<text.endIndex
+//            let range = NSRange(selectionRange, in: text)
+//            selection = (matchedPrefix, range, String(messageWithoutPrefix))
             // Call delegate and get items
-            autocompletionDelegate?.didMatch(prefix: matchedPrefix, message: String(messageWithoutPrefix))
-        } else {
-            hideAutoCompletionView()
-        }
+//            autocompletionDelegate?.didMatch(prefix: matchedPrefix, message: String(messageWithoutPrefix))
+//        } else {
+//            hideAutoCompletionView()
+//        }
         if let selectedTextRange = textView.selectedTextRange {
             let line = textView.caretRect(for: selectedTextRange.start)
             let overflow = line.origin.y + line.size.height - (textView.contentOffset.y + textView.bounds.size.height - textView.contentInset.bottom - textView.contentInset.top)
@@ -894,5 +909,83 @@ extension ALKChatBar: ALKAudioRecorderViewProtocol {
     public func cancelAudioRecording() {
         micButton.cancelAudioRecord()
         stopRecording()
+    }
+}
+
+
+// TODO: Clean it and move to a separate file
+extension UITextView {
+
+    func find(prefixes: Set<String>) -> (prefix: String, word: String, range: NSRange)? {
+        guard !prefixes.isEmpty,
+            let result = wordAtCaret,
+            !result.word.isEmpty
+            else { return nil }
+        for prefix in prefixes {
+            if result.word.hasPrefix(prefix) {
+                return (prefix, result.word, result.range)
+            }
+        }
+        return nil
+    }
+
+    var wordAtCaret: (word: String, range: NSRange)? {
+        guard let caretRange = self.caretRange,
+            let result = text.word(at: caretRange)
+            else { return nil }
+
+        // should be replaced with this code:
+        // NSRange(result.range, in: text)
+        // Source: https://stackoverflow.com/a/55588394
+        let location = result.range.lowerBound.encodedOffset
+        let range = NSRange(location: location, length: result.range.upperBound.encodedOffset - location)
+
+        return (result.word, range)
+    }
+
+    var caretRange: NSRange? {
+        guard let selectedRange = self.selectedTextRange else { return nil }
+        return NSRange(
+            location: offset(from: beginningOfDocument, to: selectedRange.start),
+            length: offset(from: selectedRange.start, to: selectedRange.end)
+        )
+    }
+
+}
+
+extension String {
+
+    func wordParts(_ range: Range<String.Index>) -> (left: String.SubSequence, right: String.SubSequence)? {
+        let whitespace = NSCharacterSet.whitespacesAndNewlines
+        let leftView = self[..<range.upperBound]
+        let leftIndex = leftView.rangeOfCharacter(from: whitespace, options: .backwards)?.upperBound
+            ?? leftView.startIndex
+
+        let rightView = self[range.upperBound...]
+        let rightIndex = rightView.rangeOfCharacter(from: whitespace)?.lowerBound
+            ?? endIndex
+
+        return (leftView[leftIndex...], rightView[..<rightIndex])
+    }
+
+    func word(at nsrange: NSRange) -> (word: String, range: Range<String.Index>)? {
+        guard !isEmpty,
+            let range = Range(nsrange, in: self),
+            let parts = self.wordParts(range)
+            else { return nil }
+
+        // if the left-next character is whitespace, the "right word part" is the full word
+        // short circuit with the right word part + its range
+        if let characterBeforeRange = index(range.lowerBound, offsetBy: -1, limitedBy: startIndex),
+            let character = self[characterBeforeRange].unicodeScalars.first,
+            NSCharacterSet.whitespaces.contains(character) {
+            let right = parts.right
+            return (String(right), right.startIndex ..< right.endIndex)
+        }
+
+        let joinedWord = String(parts.left + parts.right)
+        guard !joinedWord.isEmpty else { return nil }
+
+        return (joinedWord, parts.left.startIndex ..< parts.right.endIndex)
     }
 }

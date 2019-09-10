@@ -747,7 +747,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                 var messageToSend = message.string
                 if mentionHandler.containsAutosuggestions() {
 
-                    messageToSend = mentionHandler.replaceMentionsWithKeys()
+                    messageToSend = mentionHandler.replaceMentionsWithKeys().string
                     let metadataForMentions = mentionHandler.metadataForMentions() ?? [:]
                     // In case of a key match using the value set in config
                     messageMetadata = (messageMetadata ?? [:])

@@ -107,6 +107,25 @@ extension ALKMessageModel: Equatable {
 }
 
 extension ALKMessageViewModel {
+
+    var containsMentions: Bool {
+        // Only check when it's a group
+        guard (channelKey != nil), let message = message, let metadata = metadata else {
+            return false
+        }
+        let mentionParser = MessageMentionParser(message: message, metadata: metadata)
+        return mentionParser.containsMentions()
+    }
+
+    // TODO: pass attributes for font and other things
+    func attributedMessageWithMentions(displayNames: [String: String]) -> NSAttributedString? {
+        guard let message = message, let metadata = metadata else {
+            return nil
+        }
+        let mentionParser = MessageMentionParser(message: message, metadata: metadata)
+        return mentionParser.replaceUserIds(withDisplayNames: displayNames)
+    }
+
     func payloadFromMetadata() -> [[String: Any]]? {
         guard let metadata = self.metadata, let payload = metadata["payload"] as? String else { return nil }
         let data = payload.data
