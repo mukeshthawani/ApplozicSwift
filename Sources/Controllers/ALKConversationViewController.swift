@@ -389,9 +389,8 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         chatBar.setupAutoCompletion(autocompletionView)
         chatBar.registerPrefix(prefix: "/", attributes: [:])
         chatBar.registerPrefix(prefix: "@", attributes: [
-            .font: UIFont.preferredFont(forTextStyle: .body),
-            .foregroundColor: UIColor.red,
-            .backgroundColor: UIColor.red.withAlphaComponent(0.1)
+            .foregroundColor: UIColor.blue,
+            .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
             ])
         setRichMessageKitTheme()
         setupProfanityFilter()

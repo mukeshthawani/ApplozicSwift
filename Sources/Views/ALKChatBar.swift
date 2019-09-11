@@ -98,14 +98,11 @@ open class ALKChatBar: UIView, Localizable {
     }
 
     public let textView: ALKChatBarTextView = {
-        let style = NSMutableParagraphStyle()
-        style.lineSpacing = 4.0
         let tv = ALKChatBarTextView()
         tv.setBackgroundColor(UIColor.color(.none))
         tv.scrollsToTop = false
         tv.autocapitalizationType = .sentences
         tv.accessibilityIdentifier = "chatTextView"
-        tv.typingAttributes = [NSAttributedString.Key.paragraphStyle: style, NSAttributedString.Key.font: UIFont.font(.normal(size: 16.0))]
         return tv
     }()
 
@@ -226,6 +223,20 @@ open class ALKChatBar: UIView, Localizable {
         }
     }
 
+    var defaultTextAttributes: [NSAttributedString.Key: Any] = {
+        let style = NSMutableParagraphStyle()
+        style.lineSpacing = 4.0
+        let attrs = [
+            NSAttributedString.Key.paragraphStyle: style,
+            NSAttributedString.Key.font: UIFont.font(.normal(size: 16.0))
+        ]
+        return attrs
+        }() {
+        didSet {
+            textView.typingAttributes = defaultTextAttributes
+        }
+    }
+
     private var attachmentButtonStackView: UIStackView = {
         let attachmentStack = UIStackView(frame: CGRect.zero)
         return attachmentStack
@@ -304,6 +315,7 @@ open class ALKChatBar: UIView, Localizable {
 
         micButton.setAudioRecDelegate(recorderDelegate: self)
         soundRec.setAudioRecViewDelegate(recorderDelegate: self)
+        textView.typingAttributes = defaultTextAttributes
         textView.delegate = self
         backgroundColor = .background(.grayEF)
         translatesAutoresizingMaskIntoConstraints = false
@@ -701,12 +713,32 @@ extension ALKChatBar: UITextViewDelegate {
         // check if deleting an autocomplete item, if yes then
         // remove full item in one go and clear the attributes
         // TODO: move this part to autosuggestioncontroller
+        // TODO: Do it only when the autocomplete item should be removed in
+        // one go
         //
         // range.length == 1: Remove single character
         // range.lowerBound < textView.selectedRange.lowerBound: Ignore trying to delete
         //      the substring if the user is already doing so
         if range.length == 1, range.lowerBound < textView.selectedRange.lowerBound {
 
+            // Backspace/removing text
+            let attribute = textView.attributedText
+                .attributes(at: range.lowerBound, longestEffectiveRange: nil, in: range)
+                .filter { return $0.key == AutoCompleteItem.attributesKey }
+
+            if let isAutocomplete = attribute[AutoCompleteItem.attributesKey] as? String, !isAutocomplete.isEmpty {
+                // Remove the autocompleted substring
+                let lowerRange = NSRange(location: 0, length: range.location + 1)
+                textView.attributedText.enumerateAttribute(AutoCompleteItem.attributesKey, in: lowerRange, options: .reverse, using: { (_, range, stop) in
+
+                    // Only delete the first found range
+                    defer { stop.pointee = true }
+
+                    let emptyString = NSAttributedString(string: "", attributes: textView.typingAttributes)
+                    textView.attributedText = textView.attributedText.replacingCharacters(in: range, with: emptyString)
+                    textView.selectedRange = NSRange(location: range.location, length: 0)
+                })
+            }
         }
 
 //        text = text.replacingCharacters(in: range, with: string) as NSString
@@ -730,6 +762,7 @@ extension ALKChatBar: UITextViewDelegate {
         placeHolder.alpha = textView.text.isEmpty ? 1.0 : 0.0
 
         toggleButtonInChatBar(hide: textView.text.isEmpty)
+        textView.typingAttributes = defaultTextAttributes
 
 //        func prefixIn(text: String) -> String? {
 //            for prefix in autocompletionPrefixes {

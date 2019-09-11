@@ -26,4 +26,15 @@ open class ALKChatBarTextView: UITextView {
 
         return super.canPerformAction(action, withSender: sender)
     }
+
+    open override var attributedText: NSAttributedString! {
+        get { return super.attributedText }
+        set {
+            let didChange = super.attributedText != newValue
+            super.attributedText = newValue
+            if didChange {
+                delegate?.textViewDidChange?(self)
+            }
+        }
+    }
 }
