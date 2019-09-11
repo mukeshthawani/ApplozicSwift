@@ -358,6 +358,7 @@ open class ALKChatBar: UIView, Localizable {
     open func clear() {
         textView.text = ""
         clearTextInTextView()
+        textView.attributedText = nil
         toggleKeyboardType(textView: textView)
         hideAutoCompletionView()
     }
@@ -656,10 +657,11 @@ open class ALKChatBar: UIView, Localizable {
     }
 
     func updateTextViewHeight(textView: UITextView, text: String) {
-        let style = NSMutableParagraphStyle()
-        style.lineSpacing = 4.0
-        let font = textView.font ?? UIFont.font(.normal(size: 14.0))
-        let attributes = [NSAttributedString.Key.paragraphStyle: style, NSAttributedString.Key.font: font]
+//        let style = NSMutableParagraphStyle()
+//        style.lineSpacing = 4.0
+//        let font = textView.font ?? UIFont.font(.normal(size: 14.0))
+//        let attributes = [NSAttributedString.Key.paragraphStyle: style, NSAttributedString.Key.font: font]
+        let attributes = textView.typingAttributes
         let tv = UITextView(frame: textView.frame)
         tv.attributedText = NSAttributedString(string: text, attributes: attributes)
 
@@ -742,7 +744,7 @@ extension ALKChatBar: UITextViewDelegate {
             }
         }
 
-//        text = text.replacingCharacters(in: range, with: string) as NSString
+        text = text.replacingCharacters(in: range, with: string) as NSString
         updateTextViewHeight(textView: textView, text: text as String)
         return true
     }
@@ -759,41 +761,17 @@ extension ALKChatBar: UITextViewDelegate {
     }
 
     public func textViewDidChange(_ textView: UITextView) {
-        placeHolder.isHidden = !textView.text.isEmpty
-        placeHolder.alpha = textView.text.isEmpty ? 1.0 : 0.0
 
-        toggleButtonInChatBar(hide: textView.text.isEmpty)
         textView.typingAttributes = defaultTextAttributes
+        if textView.text.isEmpty {
+            clearTextInTextView()
+        } else {
+            placeHolder.isHidden = true
+            placeHolder.alpha = 0
 
-//        func prefixIn(text: String) -> String? {
-//            for prefix in autocompletionPrefixes {
-//                if textStartsWithPrefix(text, prefix: prefix) {
-//                    return prefix
-//                }
-//            }
-//            return nil
-//        }
-//
-//
-//        if let text = textView.text, let matchedPrefix = prefixIn(text: text) {
+            toggleButtonInChatBar(hide: false)
+        }
 
-            // TODO: handle whitespace characters when calling didMatch.
-            // Maybe only call only call when valid chars are present and there
-            // is no gap.
-            // Also, it is getting called everytime when a text is changed
-            // and the text contains @ in the start. Use selection to
-            // check not the whole text
-
-//            let messageWithoutPrefix = (text as NSString).substring(from: matchedPrefix.utf16.count)
-//
-//            let selectionRange = text.startIndex..<text.endIndex
-//            let range = NSRange(selectionRange, in: text)
-//            selection = (matchedPrefix, range, String(messageWithoutPrefix))
-            // Call delegate and get items
-//            autocompletionDelegate?.didMatch(prefix: matchedPrefix, message: String(messageWithoutPrefix))
-//        } else {
-//            hideAutoCompletionView()
-//        }
         if let selectedTextRange = textView.selectedTextRange {
             let line = textView.caretRect(for: selectedTextRange.start)
             let overflow = line.origin.y + line.size.height - (textView.contentOffset.y + textView.bounds.size.height - textView.contentInset.bottom - textView.contentInset.top)

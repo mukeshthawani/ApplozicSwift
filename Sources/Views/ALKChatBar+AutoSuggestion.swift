@@ -61,7 +61,7 @@ extension ALKChatBar: UITableViewDataSource, UITableViewDelegate {
         // TODO: use this
 //        let insertionRange = NSRange(location: selection.range.location, length: selection.word.utf16.count)
         insert(item: item, at: selection.range, replace: selection)
-        updateTextViewHeight(textView: textView, text: item.content)
+        updateTextViewHeight(textView: textView, text: textView.text + item.content)
         hideAutoCompletionView()
     }
 }
