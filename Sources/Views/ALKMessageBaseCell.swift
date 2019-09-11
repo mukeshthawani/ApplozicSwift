@@ -134,6 +134,7 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
     }()
 
     var replyViewAction: (() -> Void)?
+    var displayNames: ((Set<String>) -> ([String: String]?))?
 
     func update(viewModel: ALKMessageViewModel, style: Style) {
         self.viewModel = viewModel
@@ -168,6 +169,16 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             emailTopHeight.constant = 0
             emailBottomViewHeight.constant = 0
             messageView.text = message
+
+            // TODO: move attributedText creation part to a function so
+            // that the same can be used while calculating height.
+            if viewModel.containsMentions,
+                let userIds = viewModel.mentionedUserIds,
+                let names = displayNames?(userIds),
+                let attributedText = viewModel
+                    .attributedMessageWithMentions(displayNames: names) {
+                messageView.attributedText = attributedText
+            }
             return
         case .html:
             emailTopHeight.constant = 0
@@ -220,7 +231,8 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
 
     class func messageHeight(viewModel: ALKMessageViewModel,
                              width: CGFloat,
-                             font: UIFont) -> CGFloat {
+                             font: UIFont,
+                             displayNames: ((Set<String>) -> ([String: String]?))?) -> CGFloat {
         dummyMessageView.font = font
 
         /// Check if message is nil
@@ -230,6 +242,13 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
 
         switch viewModel.messageType {
         case .text:
+            if viewModel.containsMentions,
+                let userIds = viewModel.mentionedUserIds,
+                let names = displayNames?(userIds),
+                let attributedText = viewModel
+                    .attributedMessageWithMentions(displayNames: names) {
+                return TextViewSizeCalculator.height(dummyMessageView, attributedText: attributedText, maxWidth: width)
+            }
             return TextViewSizeCalculator.height(dummyMessageView, text: message, maxWidth: width)
         case .html:
             guard let attributedText = attributedStringFrom(message, for: viewModel.identifier) else {

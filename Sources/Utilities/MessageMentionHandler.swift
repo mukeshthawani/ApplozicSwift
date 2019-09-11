@@ -87,7 +87,8 @@ struct MessageMentionHandler {
         allMentions.forEach { mention in
             let userId = String(mention.userId.dropFirst(MessageMentionHandler.mentionSymbol.count))
             var mentionMetadata: [String: Any] = ["userId": userId]
-            mentionMetadata["indices"] = [mention.range.lowerBound, mention.range.upperBound]
+            let indices: [Int] = [mention.range.lowerBound, mention.range.upperBound]
+            mentionMetadata["indices"] = indices
             mentions.append(mentionMetadata)
         }
         return mentions
@@ -117,10 +118,11 @@ struct MessageMentionParser {
     }
 
     func containsMentions() -> Bool {
-        guard let containsMentions = metadata["AL_MEMBER_MENTION"] as? [String: Any]  else {
-            return false
-        }
-        return !containsMentions.isEmpty
+        return !allMentions.isEmpty
+    }
+
+    func mentionedUserIds() -> Set<String> {
+        return Set(allMentions.map { String($0.word.dropFirst(mentionSymbol.count)) })
     }
 
     // One issue I can think of is that:
@@ -167,13 +169,25 @@ struct MessageMentionParser {
         withDisplayNames displayNames: [String: String]
         ) -> NSAttributedString? {
 
+        // TODO: get it from outside
+        let defaultAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.font(.normal(size: 14))
+        ]
+        let colorAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.blue,
+            .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
+        ]
+
         let attributedMessage = makeAttributedMessage(
             usingMentions: allMentions,
-            andMessage: message)
+            andMessage: message,
+            attributes: defaultAttributes)
         var newMessage = attributedMessage
         allMentions.enumerated().forEach { index, mention in
-            let attrs = [attributesKey: mention.word]
-            let userId = String(mention.word.dropLast(mentionSymbol.count))
+            var attrs: [NSAttributedString.Key: Any] = [attributesKey: mention.word]
+            attrs.merge(defaultAttributes) { $1 }
+            attrs.merge(colorAttributes) { $1 }
+            let userId = String(mention.word.dropFirst(mentionSymbol.count))
             let replacementText = NSAttributedString(
                 string: mentionSymbol + (displayNames[userId] ?? mention.word),
                 attributes: attrs)
@@ -188,12 +202,14 @@ struct MessageMentionParser {
 
     private func makeAttributedMessage(
         usingMentions mentions: [Mention],
-        andMessage message: String) -> NSAttributedString {
-        var attributedMessage = NSAttributedString(string: message)
+        andMessage message: String,
+        attributes: [NSAttributedString.Key: Any]) -> NSAttributedString {
+
+        var attributedMessage = NSAttributedString(string: message, attributes: attributes)
 
         // First add attributes at the range
         for mention in mentions {
-            let attrs = [attributesKey: mention.word]
+            let attrs = attributes.merging([attributesKey: mention.word]) { $1 }
             let replacementText = NSAttributedString(string: mention.word, attributes: attrs)
             attributedMessage = attributedMessage.replacingCharacters(in: mention.range, with: replacementText)
         }
@@ -201,17 +217,23 @@ struct MessageMentionParser {
     }
 
     private func mentionsInMetadata() -> [Mention] {
-        guard let containsMentions = metadata["AL_MEMBER_MENTION"] as? [[String: Any]]  else {
+        guard let containsMentions = metadata["AL_MEMBER_MENTION"] as? String  else {
             return []
         }
+        let data = containsMentions.data
+        let jsonArray = try? JSONSerialization.jsonObject(with: data, options: .allowFragments)
+        guard let mentionsMetadata = jsonArray as? [[String: Any]] else { return [] }
+
         var mentions: [Mention] = []
-        for i in 0..<containsMentions.count {
-            guard let userId = containsMentions[i]["userId"] as? String,
-                let indices = containsMentions[i]["indices"] as? [Int],
+        for i in 0..<mentionsMetadata.count {
+            guard let userId = mentionsMetadata[i]["userId"] as? String,
+                let indices = mentionsMetadata[i]["indices"] as? [Int],
                 indices.count == 2 else {
                     continue
             }
-            let range = NSRange(location: indices[0], length: indices[1]-indices[0])
+            let range = NSRange(
+                location: indices[0],
+                length: indices[1]-indices[0])
             // TODO: Verify if the prefix is present at this range or not.
             // If not then break and return empty as the indices are incorrect.
             mentions.append((mentionSymbol+userId, range))

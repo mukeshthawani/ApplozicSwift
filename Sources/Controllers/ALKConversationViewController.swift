@@ -2036,19 +2036,18 @@ extension ALKConversationViewController: AutoCompletionDelegate {
         // And create cell that just uses content
         // Also will have to remove the usage of autocompleteitem
         // as we have a complex and different DS for different usecases.
-        viewModel.fetchGroupMembersForAutocompletion { items in
-            // update auto completion items based on the prefix
-            if message.isEmpty {
-                self.chatBar.filteredAutocompletionItems = items
-            } else {
-                self.chatBar.filteredAutocompletionItems = items.filter { $0.content.lowercased().contains(message) }
-            }
-
-            // then reload and show the suggestion view
-            UIView.performWithoutAnimation {
-                self.chatBar.reloadAutoCompletionView()
-            }
-            self.chatBar.showAutoCompletionView()
+        let items = viewModel.fetchGroupMembersForAutocompletion()
+        // update auto completion items based on the prefix
+        if message.isEmpty {
+            self.chatBar.filteredAutocompletionItems = items
+        } else {
+            self.chatBar.filteredAutocompletionItems = items.filter { $0.content.lowercased().contains(message) }
         }
+
+        // then reload and show the suggestion view
+        UIView.performWithoutAnimation {
+            self.chatBar.reloadAutoCompletionView()
+        }
+        self.chatBar.showAutoCompletionView()
     }
 }

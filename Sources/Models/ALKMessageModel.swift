@@ -110,20 +110,29 @@ extension ALKMessageViewModel {
 
     var containsMentions: Bool {
         // Only check when it's a group
-        guard (channelKey != nil), let message = message, let metadata = metadata else {
+        guard (channelKey != nil), let mentionParser = mentionParser else {
             return false
         }
-        let mentionParser = MessageMentionParser(message: message, metadata: metadata)
         return mentionParser.containsMentions()
+    }
+
+    var mentionedUserIds: Set<String>? {
+        return mentionParser?.mentionedUserIds()
+    }
+
+    private var mentionParser: MessageMentionParser? {
+        guard let message = message,
+            let metadata = metadata,
+            !metadata.isEmpty else {
+                return nil
+        }
+        let mentionParser = MessageMentionParser(message: message, metadata: metadata)
+        return mentionParser
     }
 
     // TODO: pass attributes for font and other things
     func attributedMessageWithMentions(displayNames: [String: String]) -> NSAttributedString? {
-        guard let message = message, let metadata = metadata else {
-            return nil
-        }
-        let mentionParser = MessageMentionParser(message: message, metadata: metadata)
-        return mentionParser.replaceUserIds(withDisplayNames: displayNames)
+        return mentionParser?.replaceUserIds(withDisplayNames: displayNames)
     }
 
     func payloadFromMetadata() -> [[String: Any]]? {
