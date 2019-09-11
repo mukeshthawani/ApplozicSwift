@@ -23,11 +23,24 @@ extension ALKChatBar: UITableViewDataSource, UITableViewDelegate {
             cell = UITableViewCell(style: .subtitle, reuseIdentifier: UITableViewCell.reuseIdentifier)
         }
 
-        guard indexPath.row < filteredAutocompletionItems.count else { return cell }
+        guard indexPath.row < filteredAutocompletionItems.count,
+            let selection = selection else {
+                return cell
+        }
         let item = filteredAutocompletionItems[indexPath.row]
-        cell.detailTextLabel?.setTextColor(.gray)
-        cell.textLabel?.text = "/\(item.key)"
-        cell.detailTextLabel?.text = "\(item.content)"
+
+        let prefix = selection.prefix
+        if prefix == "@" {
+            let cell: MentionAutoSuggestionCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+            cell.updateView(item: item)
+            return cell
+        } else if prefix == "/" {
+            cell.detailTextLabel?.setTextColor(.gray)
+            cell.textLabel?.text = "/\(item.key)"
+            cell.detailTextLabel?.text = "\(item.content)"
+        } else {
+            cell.textLabel?.text = "\(item.content)"
+        }
         return cell
     }
 

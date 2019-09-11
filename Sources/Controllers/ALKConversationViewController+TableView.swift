@@ -69,7 +69,6 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 let cell: ALKMyMessageCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
                 cell.showReport = false
                 cell.setLocalizedStringFileName(configuration.localizedStringFileName)
-                // TODO: pass this all message text cells
                 cell.displayNames = { [weak self] userIds in
                     return self?.viewModel.displayNames(ofUserIds: userIds)
                 }

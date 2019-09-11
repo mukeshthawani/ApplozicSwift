@@ -41,8 +41,10 @@ struct MessageMentionHandler {
     func metadataForMentions() -> [String: Any]? {
         guard !allMentions.isEmpty else { return nil }
         // all usernames for notification
-        let userIdString = allMentions
-            .reduce("") { $0 + (!$0.isEmpty ? ",":"") + $1.userId.dropFirst(MessageMentionHandler.mentionSymbol.count) }
+        let userIds = Set(allMentions
+            .map { $0.userId.dropFirst(MessageMentionHandler.mentionSymbol.count) })
+        let userIdString = userIds
+            .reduce("") { $0 + (!$0.isEmpty ? ",":"") + $1 }
         var metadata: [String: Any] = [MemberMention.MetadataKey.notification: userIdString]
 
         do {

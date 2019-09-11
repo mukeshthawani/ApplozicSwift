@@ -386,6 +386,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         super.viewDidLoad()
         setupConstraints()
         autocompletionView.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
+        autocompletionView.register(MentionAutoSuggestionCell.self)
         chatBar.setupAutoCompletion(autocompletionView)
         chatBar.registerPrefix(prefix: "/", attributes: [:])
         chatBar.registerPrefix(prefix: "@", attributes: [
