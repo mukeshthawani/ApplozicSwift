@@ -147,8 +147,11 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             else { return }
             replyNameLabel.text = actualMessage.isMyMessage ?
                 selfNameText : actualMessage.displayName
+            // TODO: add mention support for reply messages.
+            // Add only for the text type. And handle the same in the height.
             replyMessageLabel.text =
                 getMessageTextFrom(viewModel: actualMessage)
+
             if let imageURL = getURLForPreviewImage(message: actualMessage) {
                 setImageFrom(url: imageURL, to: previewImageView)
             } else {
@@ -169,14 +172,11 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             emailTopHeight.constant = 0
             emailBottomViewHeight.constant = 0
             messageView.text = message
-
-            // TODO: move attributedText creation part to a function so
-            // that the same can be used while calculating height.
-            if viewModel.containsMentions,
-                let userIds = viewModel.mentionedUserIds,
-                let names = displayNames?(userIds),
-                let attributedText = viewModel
-                    .attributedMessageWithMentions(displayNames: names) {
+            if let attributedText = ALKMessageCell
+                .attributedTextWithMentions(
+                    viewModel,
+                    style.font,
+                    displayNames: displayNames) {
                 messageView.attributedText = attributedText
             }
             return
@@ -242,11 +242,11 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
 
         switch viewModel.messageType {
         case .text:
-            if viewModel.containsMentions,
-                let userIds = viewModel.mentionedUserIds,
-                let names = displayNames?(userIds),
-                let attributedText = viewModel
-                    .attributedMessageWithMentions(displayNames: names) {
+            if let attributedText = ALKMessageCell
+                .attributedTextWithMentions(
+                    viewModel,
+                    font,
+                    displayNames: displayNames) {
                 return TextViewSizeCalculator.height(dummyMessageView, attributedText: attributedText, maxWidth: width)
             }
             return TextViewSizeCalculator.height(dummyMessageView, text: message, maxWidth: width)
@@ -443,5 +443,28 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
         messageView.text = nil
         messageView.typingAttributes = [:]
         messageView.setStyle(style)
+    }
+
+    private class func attributedTextWithMentions(
+        _ viewModel: ALKMessageViewModel,
+        _ font: UIFont,
+        displayNames: ((Set<String>) -> ([String: String]?))?
+        ) -> NSAttributedString? {
+        let defaultAttributes: [NSAttributedString.Key: Any] = [.font: font]
+        let colorAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.blue,
+            .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
+        ]
+        if viewModel.containsMentions,
+            let userIds = viewModel.mentionedUserIds,
+            let names = displayNames?(userIds),
+            let attributedText = viewModel
+                .attributedMessageWithMentions(
+                    displayNames: names,
+                    attributesForMention: colorAttributes,
+                    defaultAttributes: defaultAttributes) {
+            return attributedText
+        }
+        return nil
     }
 }

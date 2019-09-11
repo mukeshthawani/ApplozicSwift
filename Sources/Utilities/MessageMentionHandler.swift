@@ -168,7 +168,9 @@ struct MessageMentionParser {
     // might show up. Or we can think of a different backup system
 
     func replaceUserIds(
-        withDisplayNames displayNames: [String: String]
+        withDisplayNames displayNames: [String: String],
+        attributesForMention: [NSAttributedString.Key: Any],
+        defaultAttributes: [NSAttributedString.Key: Any]
         ) -> NSAttributedString? {
 
         // TODO: get it from outside

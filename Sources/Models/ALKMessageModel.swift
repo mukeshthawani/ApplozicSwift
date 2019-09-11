@@ -130,9 +130,14 @@ extension ALKMessageViewModel {
         return mentionParser
     }
 
-    // TODO: pass attributes for font and other things
-    func attributedMessageWithMentions(displayNames: [String: String]) -> NSAttributedString? {
-        return mentionParser?.replaceUserIds(withDisplayNames: displayNames)
+    func attributedMessageWithMentions(
+        displayNames: [String: String],
+        attributesForMention: [NSAttributedString.Key: Any],
+        defaultAttributes: [NSAttributedString.Key: Any]) -> NSAttributedString? {
+        return mentionParser?.replaceUserIds(
+            withDisplayNames: displayNames,
+            attributesForMention: attributesForMention,
+            defaultAttributes: defaultAttributes)
     }
 
     func payloadFromMetadata() -> [[String: Any]]? {
