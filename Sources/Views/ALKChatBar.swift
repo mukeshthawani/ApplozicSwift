@@ -257,8 +257,6 @@ open class ALKChatBar: UIView, Localizable {
     private var autocompletionPrefixes: Set<String> = []
     private var autocompletionPrefixAttributes: [String: [NSAttributedString.Key: Any]] = [:]
 
-    // TODO: move this to AutoSuggestionController
-    //
     // Prefix and selected item pair
     typealias Selection = (
         prefix: String,
@@ -276,8 +274,6 @@ open class ALKChatBar: UIView, Localizable {
     @objc func tapped(button: UIButton) {
         switch button {
         case sendButton:
-//            let text = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
-            // TODO: remove whitespace and new lines in action handler side
             let attributedText = textView.attributedText ?? NSAttributedString(string: textView.text)
             if attributedText.string.lengthOfBytes(using: .utf8) > 0 {
                 action?(.sendText(button, attributedText))
@@ -715,9 +711,6 @@ extension ALKChatBar: UITextViewDelegate {
 
         // check if deleting an autocomplete item, if yes then
         // remove full item in one go and clear the attributes
-        // TODO: move this part to autosuggestioncontroller
-        // TODO: Do it only when the autocomplete item should be removed in
-        // one go
         //
         // range.length == 1: Remove single character
         // range.lowerBound < textView.selectedRange.lowerBound: Ignore trying to delete
@@ -856,7 +849,6 @@ extension ALKChatBar: UITextViewDelegate {
         return true
     }
 
-    // TODO: Move this to AutosuggestionController
     func insert(item: AutoCompleteItem, at insertionRange: NSRange, replace selection: Selection) {
         let defaultAttributes = textView.typingAttributes
         var newAttributes = defaultAttributes
@@ -866,19 +858,14 @@ extension ALKChatBar: UITextViewDelegate {
         }
         // prefix to identify which autocomplete is present
         newAttributes[AutoCompleteItem.attributesKey] = selection.prefix + item.key
-        // TODO: add a param to determine whether or not the
-        // prfix should be appended.
+
         let insertionItemString = NSAttributedString(
             string: selection.prefix + item.content,
             attributes: newAttributes)
 
-        // TODO: Handle prefix param
-//         let insertionRange = NSRange(location: range.location+prefix.length, length: range.length)
-
         let newAttributedText = textView.attributedText.replacingCharacters(
             in: insertionRange,
             with: insertionItemString)
-        // TODO: add space param if space should be added in the end
         newAttributedText.append(NSAttributedString(string: " ", attributes: defaultAttributes))
 
         // If we replace the text here then it resizes the textview incorrectly.
@@ -924,8 +911,6 @@ extension ALKChatBar: ALKAudioRecorderViewProtocol {
     }
 }
 
-
-// TODO: Clean it and move to a separate file
 extension UITextView {
 
     func find(prefixes: Set<String>) -> (prefix: String, word: String, range: NSRange)? {
@@ -946,9 +931,8 @@ extension UITextView {
             let result = text.word(at: caretRange)
             else { return nil }
 
-        // should be replaced with this code:
+        // TODO: should be replaced with this code:
         // NSRange(result.range, in: text)
-        // Source: https://stackoverflow.com/a/55588394
         let location = result.range.lowerBound.encodedOffset
         let range = NSRange(location: location, length: result.range.upperBound.encodedOffset - location)
 

@@ -128,10 +128,6 @@ open class ALKConversationViewModel: NSObject, Localizable {
             delegate?.loadingStarted()
             loadMessages()
         }
-        // TODO: add a feature flag for mentions
-//        membersInGroup { members in
-//            self.groupMembers = members
-//        }
     }
 
     public func addToWrapper(message: ALMessage) {
@@ -1528,7 +1524,6 @@ open class ALKConversationViewModel: NSObject, Localizable {
     }
 }
 
-// TODO: move this to a different file
 extension ALChannelDBService {
     func membersInGroup(
         channelKey: NSNumber,

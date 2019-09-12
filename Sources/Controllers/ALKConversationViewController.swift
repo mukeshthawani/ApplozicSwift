@@ -2029,16 +2029,12 @@ extension ALKConversationViewController: ALAlertButtonClickProtocol {
     }
 }
 
-// TEMP: Move it to a different file
-//
 // Override this in the agent app and if you want to support
 // other prefixes then call super.
 extension ALKConversationViewController: AutoCompletionDelegate {
     public func didMatch(prefix: String, message: String) {
         guard prefix == MessageMentionHandler.mentionSymbol else { return }
-        // And create cell that just uses content
-        // Also will have to remove the usage of autocompleteitem
-        // as we have a complex and different DS for different usecases.
+
         let items = viewModel.fetchGroupMembersForAutocompletion()
         // update auto completion items based on the prefix
         if message.isEmpty {
