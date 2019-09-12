@@ -446,6 +446,9 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         replyMessageView.closeButtonTapped = { [weak self] _ in
             self?.hideReplyMessageView()
         }
+        replyMessageView.displayNames = { [weak self] userIds in
+            return self?.viewModel.displayNames(ofUserIds: userIds)
+        }
     }
 
     func checkUserBlock() {

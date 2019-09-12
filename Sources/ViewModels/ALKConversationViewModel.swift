@@ -147,6 +147,7 @@ open class ALKConversationViewModel: NSObject, Localizable {
         alMessages.removeAll()
         richMessages.removeAll()
         alMessageWrapper = ALMessageArrayWrapper()
+        groupMembers = nil
     }
 
     open func groupProfileImgUrl() -> String {

@@ -50,6 +50,7 @@ open class ALKReplyMessageView: UIView, Localizable {
     public var closeButtonTapped: ((Bool) -> Void)?
 
     private var message: ALKMessageViewModel?
+    var displayNames: ((Set<String>) -> ([String: String]?))?
 
     private enum Padding {
         enum NameLabel {
@@ -99,6 +100,12 @@ open class ALKReplyMessageView: UIView, Localizable {
         nameLabel.text = message.isMyMessage ?
             selfNameText : message.displayName
         messageLabel.text = getMessageText()
+        if let attributedText = attributedTextWithMentions(
+            message,
+            Font.normal(size: 14).font(),
+            displayNames: displayNames) {
+            messageLabel.attributedText = attributedText
+        }
 
         if let imageURL = getURLForPreviewImage(message: message) {
             setImageFrom(url: imageURL, to: previewImageView)
@@ -281,5 +288,28 @@ open class ALKReplyMessageView: UIView, Localizable {
             print("*** Error generating thumbnail: \(error.localizedDescription)")
             return nil
         }
+    }
+
+    private func attributedTextWithMentions(
+        _ viewModel: ALKMessageViewModel,
+        _ font: UIFont,
+        displayNames: ((Set<String>) -> ([String: String]?))?
+        ) -> NSAttributedString? {
+        let defaultAttributes: [NSAttributedString.Key: Any] = [.font: font]
+        let colorAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.blue,
+            .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
+        ]
+        if viewModel.containsMentions,
+            let userIds = viewModel.mentionedUserIds,
+            let names = displayNames?(userIds),
+            let attributedText = viewModel
+                .attributedMessageWithMentions(
+                    displayNames: names,
+                    attributesForMention: colorAttributes,
+                    defaultAttributes: defaultAttributes) {
+            return attributedText
+        }
+        return nil
     }
 }

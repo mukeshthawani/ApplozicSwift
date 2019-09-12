@@ -147,8 +147,6 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             else { return }
             replyNameLabel.text = actualMessage.isMyMessage ?
                 selfNameText : actualMessage.displayName
-            // TODO: add mention support for reply messages.
-            // Add only for the text type. And handle the same in the height.
             replyMessageLabel.text =
                 getMessageTextFrom(viewModel: actualMessage)
             if viewModel.messageType == .text,
