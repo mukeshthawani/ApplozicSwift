@@ -33,6 +33,9 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
             if message.isMyMessage {
                 let cell: ALKMyMessageCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
                 cell.showReport = false
+                cell.displayNames = { [weak self] userIds in
+                    return self?.viewModel.displayNames(ofUserIds: userIds)
+                }
                 cell.setLocalizedStringFileName(configuration.localizedStringFileName)
                 cell.update(viewModel: message)
                 cell.update(chatBar: chatBar)
@@ -48,6 +51,9 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 let cell: ALKFriendMessageCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
                 cell.setLocalizedStringFileName(configuration.localizedStringFileName)
                 cell.showReport = configuration.isReportMessageEnabled
+                cell.displayNames = { [weak self] userIds in
+                    return self?.viewModel.displayNames(ofUserIds: userIds)
+                }
                 cell.update(viewModel: message)
                 cell.update(chatBar: chatBar)
                 cell.avatarTapped = { [weak self] in

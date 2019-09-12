@@ -151,6 +151,14 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             // Add only for the text type. And handle the same in the height.
             replyMessageLabel.text =
                 getMessageTextFrom(viewModel: actualMessage)
+            if viewModel.messageType == .text,
+                let attributedText = ALKMessageCell
+                    .attributedTextWithMentions(
+                        actualMessage,
+                        style.font,
+                        displayNames: displayNames) {
+                replyMessageLabel.attributedText = attributedText
+            }
 
             if let imageURL = getURLForPreviewImage(message: actualMessage) {
                 setImageFrom(url: imageURL, to: previewImageView)
@@ -161,6 +169,7 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             replyNameLabel.text = ""
             replyMessageLabel.text = ""
             previewImageView.image = nil
+            replyMessageLabel.attributedText = nil
         }
 
         timeLabel.text = viewModel.time
