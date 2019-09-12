@@ -128,14 +128,6 @@ struct MessageMentionParser {
         defaultAttributes: [NSAttributedString.Key: Any]
         ) -> NSAttributedString? {
 
-        let defaultAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.font(.normal(size: 14))
-        ]
-        let colorAttributes: [NSAttributedString.Key: Any] = [
-            .foregroundColor: UIColor.blue,
-            .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
-        ]
-
         let attributedMessage = makeAttributedMessage(
             usingMentions: allMentions,
             andMessage: message,
@@ -144,7 +136,7 @@ struct MessageMentionParser {
         allMentions.enumerated().forEach { index, mention in
             var attrs: [NSAttributedString.Key: Any] = [attributesKey: mention.word]
             attrs.merge(defaultAttributes) { $1 }
-            attrs.merge(colorAttributes) { $1 }
+            attrs.merge(attributesForMention) { $1 }
             let userId = String(mention.word.dropFirst(mentionSymbol.count))
             let replacementText = NSAttributedString(
                 string: mentionSymbol + (displayNames[userId] ?? mention.word),
