@@ -151,10 +151,11 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
                 getMessageTextFrom(viewModel: actualMessage)
             if viewModel.messageType == .text,
                 let attributedText = ALKMessageCell
-                    .attributedTextWithMentions(
-                        actualMessage,
-                        style.font,
-                        displayNames: displayNames) {
+                .attributedTextWithMentions(
+                    actualMessage,
+                    style.font,
+                    displayNames: displayNames
+                ) {
                 replyMessageLabel.attributedText = attributedText
             }
 
@@ -183,7 +184,8 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
                 .attributedTextWithMentions(
                     viewModel,
                     style.font,
-                    displayNames: displayNames) {
+                    displayNames: displayNames
+                ) {
                 messageView.attributedText = attributedText
             }
             return
@@ -253,7 +255,8 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
                 .attributedTextWithMentions(
                     viewModel,
                     font,
-                    displayNames: displayNames) {
+                    displayNames: displayNames
+                ) {
                 return TextViewSizeCalculator.height(dummyMessageView, attributedText: attributedText, maxWidth: width)
             }
             return TextViewSizeCalculator.height(dummyMessageView, text: message, maxWidth: width)
@@ -456,20 +459,21 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
         _ viewModel: ALKMessageViewModel,
         _ font: UIFont,
         displayNames: ((Set<String>) -> ([String: String]?))?
-        ) -> NSAttributedString? {
+    ) -> NSAttributedString? {
         let defaultAttributes: [NSAttributedString.Key: Any] = [.font: font]
         let colorAttributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: UIColor.blue,
-            .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
+            .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
         ]
         if viewModel.containsMentions,
             let userIds = viewModel.mentionedUserIds,
             let names = displayNames?(userIds),
             let attributedText = viewModel
-                .attributedMessageWithMentions(
-                    displayNames: names,
-                    attributesForMention: colorAttributes,
-                    defaultAttributes: defaultAttributes) {
+            .attributedMessageWithMentions(
+                displayNames: names,
+                attributesForMention: colorAttributes,
+                defaultAttributes: defaultAttributes
+            ) {
             return attributedText
         }
         return nil

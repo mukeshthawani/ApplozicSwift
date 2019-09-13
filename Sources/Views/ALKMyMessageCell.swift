@@ -267,8 +267,8 @@ open class ALKMyMessageCell: ALKMessageCell {
     }
 
     class func rowHeigh(viewModel: ALKMessageViewModel,
-                                 width: CGFloat,
-                                 displayNames: ((Set<String>) -> ([String: String]?))?) -> CGFloat {
+                        width: CGFloat,
+                        displayNames: ((Set<String>) -> ([String: String]?))?) -> CGFloat {
         /// Calculating messageHeight
         let leftSpacing = Padding.BubbleView.left + ALKMessageStyle.sentBubble.widthPadding
         let rightSpacing = Padding.BubbleView.right + bubbleViewRightPadding

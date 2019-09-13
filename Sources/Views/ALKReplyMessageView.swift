@@ -103,7 +103,8 @@ open class ALKReplyMessageView: UIView, Localizable {
         if let attributedText = attributedTextWithMentions(
             message,
             Font.normal(size: 14).font(),
-            displayNames: displayNames) {
+            displayNames: displayNames
+        ) {
             messageLabel.attributedText = attributedText
         }
 
@@ -294,20 +295,21 @@ open class ALKReplyMessageView: UIView, Localizable {
         _ viewModel: ALKMessageViewModel,
         _ font: UIFont,
         displayNames: ((Set<String>) -> ([String: String]?))?
-        ) -> NSAttributedString? {
+    ) -> NSAttributedString? {
         let defaultAttributes: [NSAttributedString.Key: Any] = [.font: font]
         let colorAttributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: UIColor.blue,
-            .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
+            .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
         ]
         if viewModel.containsMentions,
             let userIds = viewModel.mentionedUserIds,
             let names = displayNames?(userIds),
             let attributedText = viewModel
-                .attributedMessageWithMentions(
-                    displayNames: names,
-                    attributesForMention: colorAttributes,
-                    defaultAttributes: defaultAttributes) {
+            .attributedMessageWithMentions(
+                displayNames: names,
+                attributesForMention: colorAttributes,
+                defaultAttributes: defaultAttributes
+            ) {
             return attributedText
         }
         return nil

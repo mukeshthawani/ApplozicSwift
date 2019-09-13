@@ -107,10 +107,9 @@ extension ALKMessageModel: Equatable {
 }
 
 extension ALKMessageViewModel {
-
     var containsMentions: Bool {
         // Only check when it's a group
-        guard (channelKey != nil), let mentionParser = mentionParser else {
+        guard channelKey != nil, let mentionParser = mentionParser else {
             return false
         }
         return mentionParser.containsMentions()
@@ -124,7 +123,7 @@ extension ALKMessageViewModel {
         guard let message = message,
             let metadata = metadata,
             !metadata.isEmpty else {
-                return nil
+            return nil
         }
         let mentionParser = MessageMentionParser(message: message, metadata: metadata)
         return mentionParser
@@ -133,11 +132,13 @@ extension ALKMessageViewModel {
     func attributedMessageWithMentions(
         displayNames: [String: String],
         attributesForMention: [NSAttributedString.Key: Any],
-        defaultAttributes: [NSAttributedString.Key: Any]) -> NSAttributedString? {
+        defaultAttributes: [NSAttributedString.Key: Any]
+    ) -> NSAttributedString? {
         return mentionParser?.replaceUserIds(
             withDisplayNames: displayNames,
             attributesForMention: attributesForMention,
-            defaultAttributes: defaultAttributes)
+            defaultAttributes: defaultAttributes
+        )
     }
 
     func payloadFromMetadata() -> [[String: Any]]? {

@@ -34,7 +34,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 let cell: ALKMyMessageCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
                 cell.showReport = false
                 cell.displayNames = { [weak self] userIds in
-                    return self?.viewModel.displayNames(ofUserIds: userIds)
+                    self?.viewModel.displayNames(ofUserIds: userIds)
                 }
                 cell.setLocalizedStringFileName(configuration.localizedStringFileName)
                 cell.update(viewModel: message)
@@ -52,7 +52,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 cell.setLocalizedStringFileName(configuration.localizedStringFileName)
                 cell.showReport = configuration.isReportMessageEnabled
                 cell.displayNames = { [weak self] userIds in
-                    return self?.viewModel.displayNames(ofUserIds: userIds)
+                    self?.viewModel.displayNames(ofUserIds: userIds)
                 }
                 cell.update(viewModel: message)
                 cell.update(chatBar: chatBar)
@@ -76,7 +76,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 cell.showReport = false
                 cell.setLocalizedStringFileName(configuration.localizedStringFileName)
                 cell.displayNames = { [weak self] userIds in
-                    return self?.viewModel.displayNames(ofUserIds: userIds)
+                    self?.viewModel.displayNames(ofUserIds: userIds)
                 }
                 cell.update(viewModel: message)
                 cell.update(chatBar: chatBar)
@@ -90,7 +90,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 cell.setLocalizedStringFileName(configuration.localizedStringFileName)
                 cell.showReport = configuration.isReportMessageEnabled
                 cell.displayNames = { [weak self] userIds in
-                    return self?.viewModel.displayNames(ofUserIds: userIds)
+                    self?.viewModel.displayNames(ofUserIds: userIds)
                 }
                 cell.update(viewModel: message)
                 cell.update(chatBar: chatBar)

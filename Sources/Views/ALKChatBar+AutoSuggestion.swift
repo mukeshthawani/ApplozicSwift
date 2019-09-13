@@ -25,7 +25,7 @@ extension ALKChatBar: UITableViewDataSource, UITableViewDelegate {
 
         guard indexPath.row < filteredAutocompletionItems.count,
             let selection = selection else {
-                return cell
+            return cell
         }
         let item = filteredAutocompletionItems[indexPath.row]
 

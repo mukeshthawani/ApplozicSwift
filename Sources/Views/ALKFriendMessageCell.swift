@@ -314,8 +314,8 @@ open class ALKFriendMessageCell: ALKMessageCell {
     class func rowHeigh(
         viewModel: ALKMessageViewModel,
         width: CGFloat,
-        displayNames: ((Set<String>) -> ([String: String]?))?) -> CGFloat {
-
+        displayNames: ((Set<String>) -> ([String: String]?))?
+    ) -> CGFloat {
         let minimumHeight = Padding.AvatarImage.top + Padding.AvatarImage.height + 5
         /// Calculating available width for messageView
         let leftSpacing = Padding.AvatarImage.left + Padding.AvatarImage.width + Padding.BubbleView.left + bubbleViewLeftPadding

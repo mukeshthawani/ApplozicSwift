@@ -7,7 +7,7 @@
 
 import Foundation
 
-// typealias for all type related to mentions
+// typealias for all types related to mentions
 enum MemberMention {
     enum MetadataKey {
         static let notification = "AL_NOTIFICATION"
@@ -16,7 +16,6 @@ enum MemberMention {
 }
 
 struct MessageMentionHandler {
-
     typealias Mention = (userId: String, range: NSRange)
     static let mentionSymbol = "@"
 
@@ -25,13 +24,13 @@ struct MessageMentionHandler {
     private var allMentions: [Mention] = []
 
     private var messageRange: NSRange {
-        let range = message.string.startIndex..<message.string.endIndex
+        let range = message.string.startIndex ..< message.string.endIndex
         return NSRange(range, in: message.string)
     }
 
     init(message: NSAttributedString) {
         self.message = message
-        self.allMentions = mentionsInMessage(message)
+        allMentions = mentionsInMessage(message)
     }
 
     func containsAutosuggestions() -> Bool {
@@ -44,12 +43,12 @@ struct MessageMentionHandler {
         let userIds = Set(allMentions
             .map { $0.userId.dropFirst(MessageMentionHandler.mentionSymbol.count) })
         let userIdString = userIds
-            .reduce("") { $0 + (!$0.isEmpty ? ",":"") + $1 }
+            .reduce("") { $0 + (!$0.isEmpty ? "," : "") + $1 }
         var metadata: [String: Any] = [MemberMention.MetadataKey.notification: userIdString]
 
         do {
             let data = try JSONSerialization.data(withJSONObject: userMentionsMetadata(), options: .prettyPrinted)
-           metadata[MemberMention.MetadataKey.mention] = String(data: data, encoding: String.Encoding.utf8) ?? ""
+            metadata[MemberMention.MetadataKey.mention] = String(data: data, encoding: String.Encoding.utf8) ?? ""
         } catch {
             print("Error while serializing mention metadata: \(error)")
         }
@@ -71,10 +70,10 @@ struct MessageMentionHandler {
     }
 
     private func mentionsInMessage(_ attrString: NSAttributedString) -> [Mention] {
-        let range = attrString.string.startIndex..<attrString.string.endIndex
+        let range = attrString.string.startIndex ..< attrString.string.endIndex
         let messageRange = NSRange(range, in: attrString.string)
         var allMentions: [Mention] = []
-        attrString.enumerateAttribute(AutoCompleteItem.attributesKey, in: messageRange, options: []) { (value, keyRange, _) in
+        attrString.enumerateAttribute(AutoCompleteItem.attributesKey, in: messageRange, options: []) { value, keyRange, _ in
             if let value = value as? String, value.starts(with: MessageMentionHandler.mentionSymbol) {
                 allMentions.append((value, keyRange))
             }
@@ -103,7 +102,7 @@ struct MessageMentionParser {
     let message: String
     let metadata: [String: Any]
 
-    private let attributesKey = NSAttributedString.Key.init("com.applozicswift.autocompletekey")
+    private let attributesKey = NSAttributedString.Key("com.applozicswift.autocompletekey")
     private let mentionSymbol = "@"
 
     private var allMentions: [Mention] = []
@@ -111,7 +110,7 @@ struct MessageMentionParser {
     init(message: String, metadata: [String: Any]) {
         self.message = message
         self.metadata = metadata
-        self.allMentions = mentionsInMetadata()
+        allMentions = mentionsInMetadata()
     }
 
     func containsMentions() -> Bool {
@@ -126,12 +125,12 @@ struct MessageMentionParser {
         withDisplayNames displayNames: [String: String],
         attributesForMention: [NSAttributedString.Key: Any],
         defaultAttributes: [NSAttributedString.Key: Any]
-        ) -> NSAttributedString? {
-
+    ) -> NSAttributedString? {
         let attributedMessage = makeAttributedMessage(
             usingMentions: allMentions,
             andMessage: message,
-            attributes: defaultAttributes)
+            attributes: defaultAttributes
+        )
         var newMessage = attributedMessage
         allMentions.enumerated().forEach { index, mention in
             var attrs: [NSAttributedString.Key: Any] = [attributesKey: mention.word]
@@ -140,7 +139,8 @@ struct MessageMentionParser {
             let userId = String(mention.word.dropFirst(mentionSymbol.count))
             let replacementText = NSAttributedString(
                 string: mentionSymbol + (displayNames[userId] ?? mention.word),
-                attributes: attrs)
+                attributes: attrs
+            )
 
             // As the range will change after text replacement
             // so calculating again.
@@ -153,8 +153,8 @@ struct MessageMentionParser {
     private func makeAttributedMessage(
         usingMentions mentions: [Mention],
         andMessage message: String,
-        attributes: [NSAttributedString.Key: Any]) -> NSAttributedString {
-
+        attributes: [NSAttributedString.Key: Any]
+    ) -> NSAttributedString {
         var attributedMessage = NSAttributedString(string: message, attributes: attributes)
 
         // First add attributes at the range
@@ -167,7 +167,7 @@ struct MessageMentionParser {
     }
 
     private func mentionsInMetadata() -> [Mention] {
-        guard let containsMentions = metadata["AL_MEMBER_MENTION"] as? String  else {
+        guard let containsMentions = metadata["AL_MEMBER_MENTION"] as? String else {
             return []
         }
         let data = containsMentions.data
@@ -175,25 +175,26 @@ struct MessageMentionParser {
         guard let mentionsMetadata = jsonArray as? [[String: Any]] else { return [] }
 
         var mentions: [Mention] = []
-        for i in 0..<mentionsMetadata.count {
+        for i in 0 ..< mentionsMetadata.count {
             guard let userId = mentionsMetadata[i]["userId"] as? String,
                 let indices = mentionsMetadata[i]["indices"] as? [Int],
                 indices.count == 2 else {
-                    continue
+                continue
             }
             let range = NSRange(
                 location: indices[0],
-                length: indices[1]-indices[0])
-            mentions.append((mentionSymbol+userId, range))
+                length: indices[1] - indices[0]
+            )
+            mentions.append((mentionSymbol + userId, range))
         }
         return mentions
     }
 
     private func mentionsInMessage(_ attrString: NSAttributedString) -> [Mention] {
-        let range = attrString.string.startIndex..<attrString.string.endIndex
+        let range = attrString.string.startIndex ..< attrString.string.endIndex
         let messageRange = NSRange(range, in: attrString.string)
         var allMentions: [Mention] = []
-        attrString.enumerateAttribute(attributesKey, in: messageRange, options: []) { (value, keyRange, _) in
+        attrString.enumerateAttribute(attributesKey, in: messageRange, options: []) { value, keyRange, _ in
             if let value = value as? String, value.starts(with: mentionSymbol) {
                 allMentions.append((value, keyRange))
             }

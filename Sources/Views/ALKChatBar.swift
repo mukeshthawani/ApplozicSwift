@@ -16,7 +16,7 @@ public struct AutoCompleteItem {
     var displayImageURL: URL?
 
     /// A key used for referencing which substrings were autocompletes
-    static let attributesKey = NSAttributedString.Key.init("com.applozicswift.autocompletekey")
+    static let attributesKey = NSAttributedString.Key("com.applozicswift.autocompletekey")
 
     public init(key: String, content: String, displayImageURL: URL? = nil) {
         self.key = key
@@ -229,10 +229,10 @@ open class ALKChatBar: UIView, Localizable {
         style.lineSpacing = 4.0
         let attrs = [
             NSAttributedString.Key.paragraphStyle: style,
-            NSAttributedString.Key.font: UIFont.font(.normal(size: 16.0))
+            NSAttributedString.Key.font: UIFont.font(.normal(size: 16.0)),
         ]
         return attrs
-        }() {
+    }() {
         didSet {
             textView.typingAttributes = defaultTextAttributes
         }
@@ -261,7 +261,8 @@ open class ALKChatBar: UIView, Localizable {
     typealias Selection = (
         prefix: String,
         range: NSRange,
-        word: String)
+        word: String
+    )
     var selection: Selection?
 
     private enum ConstraintIdentifier: String {
@@ -716,16 +717,15 @@ extension ALKChatBar: UITextViewDelegate {
         // range.lowerBound < textView.selectedRange.lowerBound: Ignore trying to delete
         //      the substring if the user is already doing so
         if range.length == 1, range.lowerBound < textView.selectedRange.lowerBound {
-
             // Backspace/removing text
             let attribute = textView.attributedText
                 .attributes(at: range.lowerBound, longestEffectiveRange: nil, in: range)
-                .filter { return $0.key == AutoCompleteItem.attributesKey }
+                .filter { $0.key == AutoCompleteItem.attributesKey }
 
             if let isAutocomplete = attribute[AutoCompleteItem.attributesKey] as? String, !isAutocomplete.isEmpty {
                 // Remove the autocompleted substring
                 let lowerRange = NSRange(location: 0, length: range.location + 1)
-                textView.attributedText.enumerateAttribute(AutoCompleteItem.attributesKey, in: lowerRange, options: .reverse, using: { (_, range, stop) in
+                textView.attributedText.enumerateAttribute(AutoCompleteItem.attributesKey, in: lowerRange, options: .reverse, using: { _, range, stop in
 
                     // Only delete the first found range
                     defer { stop.pointee = true }
@@ -754,7 +754,6 @@ extension ALKChatBar: UITextViewDelegate {
     }
 
     public func textViewDidChange(_ textView: UITextView) {
-
         textView.typingAttributes = defaultTextAttributes
         if textView.text.isEmpty {
             clearTextInTextView()
@@ -853,19 +852,21 @@ extension ALKChatBar: UITextViewDelegate {
         let defaultAttributes = textView.typingAttributes
         var newAttributes = defaultAttributes
         if let prefixAttributes = autocompletionPrefixAttributes[selection.prefix] {
-             // pass prefix attributes for the range and override old value if present
-            newAttributes.merge(prefixAttributes) { return $1 }
+            // pass prefix attributes for the range and override old value if present
+            newAttributes.merge(prefixAttributes) { $1 }
         }
         // prefix to identify which autocomplete is present
         newAttributes[AutoCompleteItem.attributesKey] = selection.prefix + item.key
 
         let insertionItemString = NSAttributedString(
             string: selection.prefix + item.content,
-            attributes: newAttributes)
+            attributes: newAttributes
+        )
 
         let newAttributedText = textView.attributedText.replacingCharacters(
             in: insertionRange,
-            with: insertionItemString)
+            with: insertionItemString
+        )
         newAttributedText.append(NSAttributedString(string: " ", attributes: defaultAttributes))
 
         // If we replace the text here then it resizes the textview incorrectly.
@@ -912,12 +913,11 @@ extension ALKChatBar: ALKAudioRecorderViewProtocol {
 }
 
 extension UITextView {
-
     func find(prefixes: Set<String>) -> (prefix: String, word: String, range: NSRange)? {
         guard !prefixes.isEmpty,
             let result = wordAtCaret,
             !result.word.isEmpty
-            else { return nil }
+        else { return nil }
         for prefix in prefixes {
             if result.word.hasPrefix(prefix) {
                 return (prefix, result.word, result.range)
@@ -929,7 +929,7 @@ extension UITextView {
     var wordAtCaret: (word: String, range: NSRange)? {
         guard let caretRange = self.caretRange,
             let result = text.word(at: caretRange)
-            else { return nil }
+        else { return nil }
 
         // TODO: should be replaced with this code:
         // NSRange(result.range, in: text)
@@ -946,11 +946,9 @@ extension UITextView {
             length: offset(from: selectedRange.start, to: selectedRange.end)
         )
     }
-
 }
 
 extension String {
-
     func wordParts(_ range: Range<String.Index>) -> (left: String.SubSequence, right: String.SubSequence)? {
         let whitespace = NSCharacterSet.whitespacesAndNewlines
         let leftView = self[..<range.upperBound]
@@ -968,7 +966,7 @@ extension String {
         guard !isEmpty,
             let range = Range(nsrange, in: self),
             let parts = self.wordParts(range)
-            else { return nil }
+        else { return nil }
 
         // if the left-next character is whitespace, the "right word part" is the full word
         // short circuit with the right word part + its range

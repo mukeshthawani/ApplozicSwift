@@ -391,8 +391,8 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         chatBar.registerPrefix(prefix: "/", attributes: [:])
         chatBar.registerPrefix(prefix: "@", attributes: [
             .foregroundColor: UIColor.blue,
-            .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
-            ])
+            .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
+        ])
         setRichMessageKitTheme()
         setupProfanityFilter()
     }
@@ -447,7 +447,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
             self?.hideReplyMessageView()
         }
         replyMessageView.displayNames = { [weak self] userIds in
-            return self?.viewModel.displayNames(ofUserIds: userIds)
+            self?.viewModel.displayNames(ofUserIds: userIds)
         }
     }
 
@@ -749,12 +749,11 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                 let mentionHandler = MessageMentionHandler(message: message)
                 var messageToSend = message.string
                 if mentionHandler.containsAutosuggestions() {
-
                     messageToSend = mentionHandler.replaceMentionsWithKeys().string
                     let metadataForMentions = mentionHandler.metadataForMentions() ?? [:]
                     // In case of a key match using the value set in config
                     messageMetadata = (messageMetadata ?? [:])
-                        .merging(metadataForMentions) { (current, _) in current }
+                        .merging(metadataForMentions) { current, _ in current }
                 }
                 weakSelf.isJustSent = true
                 print("About to send this message: ", messageToSend)
@@ -2038,15 +2037,15 @@ extension ALKConversationViewController: AutoCompletionDelegate {
         let items = viewModel.fetchGroupMembersForAutocompletion()
         // update auto completion items based on the prefix
         if message.isEmpty {
-            self.chatBar.filteredAutocompletionItems = items
+            chatBar.filteredAutocompletionItems = items
         } else {
-            self.chatBar.filteredAutocompletionItems = items.filter { $0.content.lowercased().contains(message) }
+            chatBar.filteredAutocompletionItems = items.filter { $0.content.lowercased().contains(message) }
         }
 
         // then reload and show the suggestion view
         UIView.performWithoutAnimation {
             self.chatBar.reloadAutoCompletionView()
         }
-        self.chatBar.showAutoCompletionView()
+        chatBar.showAutoCompletionView()
     }
 }

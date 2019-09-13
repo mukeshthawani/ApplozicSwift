@@ -5,8 +5,8 @@
 //  Created by Mukesh on 11/09/19.
 //
 
-import UIKit
 import Kingfisher
+import UIKit
 
 class MentionAutoSuggestionCell: UITableViewCell {
     struct Padding {

@@ -242,14 +242,13 @@ open class ALKConversationViewModel: NSObject, Localizable {
         switch messageModel.messageType {
         case .text, .html, .email:
             if messageModel.isMyMessage {
-
                 let height = ALKMyMessageCell.rowHeigh(viewModel: messageModel, width: maxWidth, displayNames: { userIds in
-                    return self.displayNames(ofUserIds: userIds)
+                    self.displayNames(ofUserIds: userIds)
                 })
                 return height.cached(with: messageModel.identifier)
             } else {
                 let height = ALKFriendMessageCell.rowHeigh(viewModel: messageModel, width: maxWidth, displayNames: { userIds in
-                    return self.displayNames(ofUserIds: userIds)
+                    self.displayNames(ofUserIds: userIds)
                 })
                 return height.cached(with: messageModel.identifier)
             }
@@ -1192,9 +1191,9 @@ open class ALKConversationViewModel: NSObject, Localizable {
         guard let members = groupMembers else { return [] }
         let items =
             members
-                .filter { $0.userId != ALUserDefaultsHandler.getUserId() }
-                .map { AutoCompleteItem(key: $0.userId, content: $0.displayName ?? $0.userId, displayImageURL: $0.friendDisplayImgURL) }
-                .sorted { $0.content < $1.content }
+            .filter { $0.userId != ALUserDefaultsHandler.getUserId() }
+            .map { AutoCompleteItem(key: $0.userId, content: $0.displayName ?? $0.userId, displayImageURL: $0.friendDisplayImgURL) }
+            .sorted { $0.content < $1.content }
         return items
     }
 
@@ -1509,7 +1508,7 @@ open class ALKConversationViewModel: NSObject, Localizable {
         }
     }
 
-    private func membersInGroup(completion:@escaping ((Set<ALContact>?) -> ())) {
+    private func membersInGroup(completion: @escaping ((Set<ALContact>?) -> Void)) {
         guard let channelKey = channelKey else {
             completion(nil)
             return
@@ -1527,7 +1526,8 @@ open class ALKConversationViewModel: NSObject, Localizable {
 extension ALChannelDBService {
     func membersInGroup(
         channelKey: NSNumber,
-        completion:@escaping ((Set<ALContact>?) -> ())) {
+        completion: @escaping ((Set<ALContact>?) -> Void)
+    ) {
         fetchChannelMembersAsync(withChannelKey: channelKey) { members in
             guard let members = members as? [String], !members.isEmpty else {
                 completion(nil)
