@@ -389,9 +389,11 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         autocompletionView.register(MentionAutoSuggestionCell.self)
         chatBar.setupAutoCompletion(autocompletionView)
         chatBar.registerPrefix(prefix: "/", attributes: [:])
-        chatBar.registerPrefix(prefix: "@", attributes: [
-            .foregroundColor: UIColor.blue,
-            .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
+        chatBar.registerPrefix(
+            prefix: MemberMention.prefix,
+            attributes: [
+                .foregroundColor: UIColor.blue,
+                .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
         ])
         setRichMessageKitTheme()
         setupProfanityFilter()
@@ -2032,7 +2034,7 @@ extension ALKConversationViewController: ALAlertButtonClickProtocol {
 // other prefixes then call super.
 extension ALKConversationViewController: AutoCompletionDelegate {
     public func didMatch(prefix: String, message: String) {
-        guard prefix == MessageMentionHandler.mentionSymbol else { return }
+        guard prefix == MemberMention.prefix else { return }
 
         let items = viewModel.fetchGroupMembersForAutocompletion()
         // update auto completion items based on the prefix

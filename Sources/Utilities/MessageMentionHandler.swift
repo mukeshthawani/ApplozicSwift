@@ -13,11 +13,11 @@ enum MemberMention {
         static let notification = "AL_NOTIFICATION"
         static let mention = "AL_MEMBER_MENTION"
     }
+    static let prefix = "@"
 }
 
 struct MessageMentionHandler {
     typealias Mention = (userId: String, range: NSRange)
-    static let mentionSymbol = "@"
 
     let message: NSAttributedString
 
@@ -41,7 +41,7 @@ struct MessageMentionHandler {
         guard !allMentions.isEmpty else { return nil }
         // all usernames for notification
         let userIds = Set(allMentions
-            .map { $0.userId.dropFirst(MessageMentionHandler.mentionSymbol.count) })
+            .map { $0.userId.dropFirst(MemberMention.prefix.count) })
         let userIdString = userIds
             .reduce("") { $0 + (!$0.isEmpty ? "," : "") + $1 }
         var metadata: [String: Any] = [MemberMention.MetadataKey.notification: userIdString]
@@ -74,7 +74,7 @@ struct MessageMentionHandler {
         let messageRange = NSRange(range, in: attrString.string)
         var allMentions: [Mention] = []
         attrString.enumerateAttribute(AutoCompleteItem.attributesKey, in: messageRange, options: []) { value, keyRange, _ in
-            if let value = value as? String, value.starts(with: MessageMentionHandler.mentionSymbol) {
+            if let value = value as? String, value.starts(with: MemberMention.prefix) {
                 allMentions.append((value, keyRange))
             }
         }
@@ -86,7 +86,7 @@ struct MessageMentionHandler {
         let newMessage = replaceMentionsWithKeys()
         let allMentions = mentionsInMessage(newMessage)
         allMentions.forEach { mention in
-            let userId = String(mention.userId.dropFirst(MessageMentionHandler.mentionSymbol.count))
+            let userId = String(mention.userId.dropFirst(MemberMention.prefix.count))
             var mentionMetadata: [String: Any] = ["userId": userId]
             let indices: [Int] = [mention.range.lowerBound, mention.range.upperBound]
             mentionMetadata["indices"] = indices
@@ -102,9 +102,6 @@ struct MessageMentionParser {
     let message: String
     let metadata: [String: Any]
 
-    private let attributesKey = NSAttributedString.Key("com.applozicswift.autocompletekey")
-    private let mentionSymbol = "@"
-
     private var allMentions: [Mention] = []
 
     init(message: String, metadata: [String: Any]) {
@@ -118,7 +115,8 @@ struct MessageMentionParser {
     }
 
     func mentionedUserIds() -> Set<String> {
-        return Set(allMentions.map { String($0.word.dropFirst(mentionSymbol.count)) })
+        return Set(allMentions
+            .map { String($0.word.dropFirst(MemberMention.prefix.count)) })
     }
 
     func replaceUserIds(
@@ -133,12 +131,12 @@ struct MessageMentionParser {
         )
         var newMessage = attributedMessage
         allMentions.enumerated().forEach { index, mention in
-            var attrs: [NSAttributedString.Key: Any] = [attributesKey: mention.word]
+            var attrs: [NSAttributedString.Key: Any] = [AutoCompleteItem.attributesKey: mention.word]
             attrs.merge(defaultAttributes) { $1 }
             attrs.merge(attributesForMention) { $1 }
-            let userId = String(mention.word.dropFirst(mentionSymbol.count))
+            let userId = String(mention.word.dropFirst(MemberMention.prefix.count))
             let replacementText = NSAttributedString(
-                string: mentionSymbol + (displayNames[userId] ?? mention.word),
+                string: MemberMention.prefix + (displayNames[userId] ?? mention.word),
                 attributes: attrs
             )
 
@@ -159,7 +157,7 @@ struct MessageMentionParser {
 
         // First add attributes at the range
         for mention in mentions {
-            let attrs = attributes.merging([attributesKey: mention.word]) { $1 }
+            let attrs = attributes.merging([AutoCompleteItem.attributesKey: mention.word]) { $1 }
             let replacementText = NSAttributedString(string: mention.word, attributes: attrs)
             attributedMessage = attributedMessage.replacingCharacters(in: mention.range, with: replacementText)
         }
@@ -185,7 +183,7 @@ struct MessageMentionParser {
                 location: indices[0],
                 length: indices[1] - indices[0]
             )
-            mentions.append((mentionSymbol + userId, range))
+            mentions.append((MemberMention.prefix + userId, range))
         }
         return mentions
     }
@@ -194,8 +192,8 @@ struct MessageMentionParser {
         let range = attrString.string.startIndex ..< attrString.string.endIndex
         let messageRange = NSRange(range, in: attrString.string)
         var allMentions: [Mention] = []
-        attrString.enumerateAttribute(attributesKey, in: messageRange, options: []) { value, keyRange, _ in
-            if let value = value as? String, value.starts(with: mentionSymbol) {
+        attrString.enumerateAttribute(AutoCompleteItem.attributesKey, in: messageRange, options: []) { value, keyRange, _ in
+            if let value = value as? String, value.starts(with: MemberMention.prefix) {
                 allMentions.append((value, keyRange))
             }
         }
