@@ -136,7 +136,7 @@ struct MessageMentionParser {
             attrs.merge(attributesForMention) { $1 }
             let userId = String(mention.word.dropFirst(MemberMention.prefix.count))
             let replacementText = NSAttributedString(
-                string: MemberMention.prefix + (displayNames[userId] ?? mention.word),
+                string: MemberMention.prefix + (displayNames[userId] ?? userId),
                 attributes: attrs
             )
 
