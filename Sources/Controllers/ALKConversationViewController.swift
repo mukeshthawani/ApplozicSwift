@@ -390,11 +390,12 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         chatBar.setupAutoCompletion(autocompletionView)
         chatBar.registerPrefix(prefix: "/", attributes: [:])
         chatBar.registerPrefix(
-            prefix: MemberMention.prefix,
+            prefix: MemberMention.Prefix,
             attributes: [
                 .foregroundColor: UIColor.blue,
-                .backgroundColor: UIColor.blue.withAlphaComponent(0.1)
-        ])
+                .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
+            ]
+        )
         setRichMessageKitTheme()
         setupProfanityFilter()
     }
@@ -2034,7 +2035,7 @@ extension ALKConversationViewController: ALAlertButtonClickProtocol {
 // other prefixes then call super.
 extension ALKConversationViewController: AutoCompletionDelegate {
     public func didMatch(prefix: String, message: String) {
-        guard prefix == MemberMention.prefix else { return }
+        guard prefix == MemberMention.Prefix else { return }
 
         let items = viewModel.fetchGroupMembersForAutocompletion()
         // update auto completion items based on the prefix

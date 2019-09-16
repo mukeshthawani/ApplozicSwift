@@ -112,7 +112,7 @@ extension ALKMessageViewModel {
         guard channelKey != nil, let mentionParser = mentionParser else {
             return false
         }
-        return mentionParser.containsMentions()
+        return mentionParser.containsMentions
     }
 
     var mentionedUserIds: Set<String>? {
@@ -134,8 +134,8 @@ extension ALKMessageViewModel {
         attributesForMention: [NSAttributedString.Key: Any],
         defaultAttributes: [NSAttributedString.Key: Any]
     ) -> NSAttributedString? {
-        return mentionParser?.replaceUserIds(
-            withDisplayNames: displayNames,
+        return mentionParser?.messageWithMentions(
+            displayNamesOfUsers: displayNames,
             attributesForMention: attributesForMention,
             defaultAttributes: defaultAttributes
         )

@@ -10,10 +10,14 @@ import Foundation
 // typealias for all types related to mentions
 enum MemberMention {
     enum MetadataKey {
-        static let notification = "AL_NOTIFICATION"
-        static let mention = "AL_MEMBER_MENTION"
+        static let Notification = "AL_NOTIFICATION"
+        static let Mention = "AL_MEMBER_MENTION"
     }
-    static let prefix = "@"
+
+    static let Prefix = "@"
+
+    // Used when generating attributed text after parsing
+    static let UserMentionKey = NSAttributedString.Key(rawValue: "USER_MENTION")
 }
 
 struct MessageMentionHandler {
@@ -41,14 +45,14 @@ struct MessageMentionHandler {
         guard !allMentions.isEmpty else { return nil }
         // all usernames for notification
         let userIds = Set(allMentions
-            .map { $0.userId.dropFirst(MemberMention.prefix.count) })
+            .map { $0.userId.dropFirst(MemberMention.Prefix.count) })
         let userIdString = userIds
             .reduce("") { $0 + (!$0.isEmpty ? "," : "") + $1 }
-        var metadata: [String: Any] = [MemberMention.MetadataKey.notification: userIdString]
+        var metadata: [String: Any] = [MemberMention.MetadataKey.Notification: userIdString]
 
         do {
             let data = try JSONSerialization.data(withJSONObject: userMentionsMetadata(), options: .prettyPrinted)
-            metadata[MemberMention.MetadataKey.mention] = String(data: data, encoding: String.Encoding.utf8) ?? ""
+            metadata[MemberMention.MetadataKey.Mention] = String(data: data, encoding: String.Encoding.utf8) ?? ""
         } catch {
             print("Error while serializing mention metadata: \(error)")
         }
@@ -74,7 +78,7 @@ struct MessageMentionHandler {
         let messageRange = NSRange(range, in: attrString.string)
         var allMentions: [Mention] = []
         attrString.enumerateAttribute(AutoCompleteItem.attributesKey, in: messageRange, options: []) { value, keyRange, _ in
-            if let value = value as? String, value.starts(with: MemberMention.prefix) {
+            if let value = value as? String, value.starts(with: MemberMention.Prefix) {
                 allMentions.append((value, keyRange))
             }
         }
@@ -86,7 +90,7 @@ struct MessageMentionHandler {
         let newMessage = replaceMentionsWithKeys()
         let allMentions = mentionsInMessage(newMessage)
         allMentions.forEach { mention in
-            let userId = String(mention.userId.dropFirst(MemberMention.prefix.count))
+            let userId = String(mention.userId.dropFirst(MemberMention.Prefix.count))
             var mentionMetadata: [String: Any] = ["userId": userId]
             let indices: [Int] = [mention.range.lowerBound, mention.range.upperBound]
             mentionMetadata["indices"] = indices
@@ -110,20 +114,22 @@ struct MessageMentionParser {
         allMentions = mentionsInMetadata()
     }
 
-    func containsMentions() -> Bool {
+    var containsMentions: Bool {
         return !allMentions.isEmpty
     }
 
     func mentionedUserIds() -> Set<String> {
         return Set(allMentions
-            .map { String($0.word.dropFirst(MemberMention.prefix.count)) })
+            .map { String($0.word.dropFirst(MemberMention.Prefix.count)) })
     }
 
-    func replaceUserIds(
-        withDisplayNames displayNames: [String: String],
+    func messageWithMentions(
+        displayNamesOfUsers displayNames: [String: String],
         attributesForMention: [NSAttributedString.Key: Any],
         defaultAttributes: [NSAttributedString.Key: Any]
     ) -> NSAttributedString? {
+        guard containsMentions else { return nil }
+
         let attributedMessage = makeAttributedMessage(
             usingMentions: allMentions,
             andMessage: message,
@@ -131,12 +137,12 @@ struct MessageMentionParser {
         )
         var newMessage = attributedMessage
         allMentions.enumerated().forEach { index, mention in
-            var attrs: [NSAttributedString.Key: Any] = [AutoCompleteItem.attributesKey: mention.word]
+            var attrs: [NSAttributedString.Key: Any] = [MemberMention.UserMentionKey: mention.word]
             attrs.merge(defaultAttributes) { $1 }
             attrs.merge(attributesForMention) { $1 }
-            let userId = String(mention.word.dropFirst(MemberMention.prefix.count))
+            let userId = String(mention.word.dropFirst(MemberMention.Prefix.count))
             let replacementText = NSAttributedString(
-                string: MemberMention.prefix + (displayNames[userId] ?? userId),
+                string: MemberMention.Prefix + (displayNames[userId] ?? userId),
                 attributes: attrs
             )
 
@@ -157,7 +163,7 @@ struct MessageMentionParser {
 
         // First add attributes at the range
         for mention in mentions {
-            let attrs = attributes.merging([AutoCompleteItem.attributesKey: mention.word]) { $1 }
+            let attrs = attributes.merging([MemberMention.UserMentionKey: mention.word]) { $1 }
             let replacementText = NSAttributedString(string: mention.word, attributes: attrs)
             attributedMessage = attributedMessage.replacingCharacters(in: mention.range, with: replacementText)
         }
@@ -165,7 +171,8 @@ struct MessageMentionParser {
     }
 
     private func mentionsInMetadata() -> [Mention] {
-        guard let containsMentions = metadata["AL_MEMBER_MENTION"] as? String else {
+        guard let containsMentions =
+            metadata[MemberMention.MetadataKey.Mention] as? String else {
             return []
         }
         let data = containsMentions.data
@@ -183,7 +190,11 @@ struct MessageMentionParser {
                 location: indices[0],
                 length: indices[1] - indices[0]
             )
-            mentions.append((MemberMention.prefix + userId, range))
+            // Check if it's a valid range and starts with the prefix
+            if let validRange = Range(range, in: message),
+                message[validRange].starts(with: MemberMention.Prefix) {
+                mentions.append((MemberMention.Prefix + userId, range))
+            }
         }
         return mentions
     }
@@ -192,8 +203,8 @@ struct MessageMentionParser {
         let range = attrString.string.startIndex ..< attrString.string.endIndex
         let messageRange = NSRange(range, in: attrString.string)
         var allMentions: [Mention] = []
-        attrString.enumerateAttribute(AutoCompleteItem.attributesKey, in: messageRange, options: []) { value, keyRange, _ in
-            if let value = value as? String, value.starts(with: MemberMention.prefix) {
+        attrString.enumerateAttribute(MemberMention.UserMentionKey, in: messageRange, options: []) { value, keyRange, _ in
+            if let value = value as? String, value.starts(with: MemberMention.Prefix) {
                 allMentions.append((value, keyRange))
             }
         }
