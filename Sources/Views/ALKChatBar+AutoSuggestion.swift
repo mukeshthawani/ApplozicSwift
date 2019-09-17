@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension ALKChatBar: UITableViewDataSource, UITableViewDelegate {
+extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
     public func numberOfSections(in _: UITableView) -> Int {
         return 1
     }
@@ -53,7 +53,7 @@ extension ALKChatBar: UITableViewDataSource, UITableViewDelegate {
         guard let selection = selection else { return }
 
         insert(item: item, at: selection.range, replace: selection)
-        updateTextViewHeight(textView: textView, text: textView.text + item.content)
+//        updateTextViewHeight(textView: textView, text: textView.text + item.content)
         hideAutoCompletionView()
     }
 }

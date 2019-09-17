@@ -32,6 +32,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
     public var individualLaunch = true
 
     public lazy var chatBar = ALKChatBar(frame: CGRect.zero, configuration: self.configuration)
+    public lazy var autocompleteManager = AutoCompleteManager()
 
     public let autocompletionView: UITableView = {
         let tableview = UITableView(frame: CGRect.zero, style: .plain)
@@ -387,15 +388,16 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         setupConstraints()
         autocompletionView.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
         autocompletionView.register(MentionAutoSuggestionCell.self)
-        chatBar.setupAutoCompletion(autocompletionView)
-        chatBar.registerPrefix(prefix: "/", attributes: [:])
-        chatBar.registerPrefix(
+        autocompleteManager.setupAutoCompletion(autocompletionView)
+        autocompleteManager.registerPrefix(prefix: "/", attributes: [:])
+        autocompleteManager.registerPrefix(
             prefix: MemberMention.Prefix,
             attributes: [
                 .foregroundColor: UIColor.blue,
                 .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
             ]
         )
+        chatBar.autoCompleteManager = autocompleteManager
         setRichMessageKitTheme()
         setupProfanityFilter()
     }
@@ -686,7 +688,8 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         if viewModel.showPoweredByMessage() { chatBar.showPoweredByMessage() }
         chatBar.accessibilityIdentifier = "chatBar"
         chatBar.setComingSoonDelegate(delegate: view)
-        chatBar.autocompletionDelegate = self
+        autocompleteManager.autocompletionDelegate = self
+        autocompleteManager.textView = chatBar.textView
         chatBar.action = { [weak self] action in
 
             guard let weakSelf = self else {
@@ -716,6 +719,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                 weakSelf.viewModel.sendKeyboardDoneTyping()
 
                 weakSelf.chatBar.clear()
+                weakSelf.autocompleteManager.hideAutoCompletionView()
 
                 if let profanityFilter = weakSelf.profanityFilter, profanityFilter.containsRestrictedWords(text: message.string) {
                     let profanityTitle = weakSelf.localizedString(
@@ -2040,15 +2044,15 @@ extension ALKConversationViewController: AutoCompletionDelegate {
         let items = viewModel.fetchGroupMembersForAutocompletion()
         // update auto completion items based on the prefix
         if message.isEmpty {
-            chatBar.filteredAutocompletionItems = items
+            autocompleteManager.filteredAutocompletionItems = items
         } else {
-            chatBar.filteredAutocompletionItems = items.filter { $0.content.lowercased().contains(message) }
+            autocompleteManager.filteredAutocompletionItems = items.filter { $0.content.lowercased().contains(message) }
         }
 
         // then reload and show the suggestion view
         UIView.performWithoutAnimation {
-            self.chatBar.reloadAutoCompletionView()
+            self.autocompleteManager.reloadAutoCompletionView()
         }
-        chatBar.showAutoCompletionView()
+        autocompleteManager.showAutoCompletionView()
     }
 }
