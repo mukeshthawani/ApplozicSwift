@@ -32,7 +32,9 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
     public var individualLaunch = true
 
     public lazy var chatBar = ALKChatBar(frame: CGRect.zero, configuration: self.configuration)
-    public lazy var autocompleteManager = AutoCompleteManager()
+    public lazy var autocompleteManager = AutoCompleteManager(
+        textView: chatBar.textView,
+        tableview: autocompletionView)
 
     public let autocompletionView: UITableView = {
         let tableview = UITableView(frame: CGRect.zero, style: .plain)
@@ -386,7 +388,6 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
     open override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()
-        setupAutoComplete()
         setRichMessageKitTheme()
         setupProfanityFilter()
     }
@@ -437,6 +438,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         prepareTable()
         prepareMoreBar()
         prepareChatBar()
+        setupAutoComplete()
         replyMessageView.closeButtonTapped = { [weak self] _ in
             self?.hideReplyMessageView()
         }
@@ -677,8 +679,6 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         if viewModel.showPoweredByMessage() { chatBar.showPoweredByMessage() }
         chatBar.accessibilityIdentifier = "chatBar"
         chatBar.setComingSoonDelegate(delegate: view)
-        autocompleteManager.autocompletionDelegate = self
-        autocompleteManager.textView = chatBar.textView
         chatBar.action = { [weak self] action in
 
             guard let weakSelf = self else {
@@ -862,7 +862,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
     private func setupAutoComplete() {
         autocompletionView.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
         autocompletionView.register(MentionAutoSuggestionCell.self)
-        autocompleteManager.setup(textView: chatBar.textView, tableview: tableView)
+        autocompleteManager.autocompletionDelegate = self
         autocompleteManager.registerPrefix(prefix: "/", attributes: [:])
         autocompleteManager.registerPrefix(
             prefix: MemberMention.Prefix,

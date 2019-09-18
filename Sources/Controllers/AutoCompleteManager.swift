@@ -11,9 +11,14 @@ public protocol AutoCompletionDelegate: AnyObject {
     func didMatch(prefix: String, message: String)
 }
 
+public struct AutoCompleteConfiguration {
+    public var addSpaceAfterInserting = true
+    public var insertWithPrefix = true
+}
+
 public class AutoCompleteManager: NSObject {
-    public var autocompletionView: UITableView!
-    public var textView: ALKChatBarTextView!
+    public let autocompletionView: UITableView
+    public let textView: ALKChatBarTextView
     public weak var autocompletionDelegate: AutoCompletionDelegate?
 
     public var autoCompletionItems = [AutoCompleteItem]()
@@ -22,6 +27,7 @@ public class AutoCompleteManager: NSObject {
     fileprivate var autoCompletionViewHeightConstraint: NSLayoutConstraint?
     private var autocompletionPrefixes: Set<String> = []
     private var autocompletionPrefixAttributes: [String: [NSAttributedString.Key: Any]] = [:]
+    private var prefixConfigurations: [String: AutoCompleteConfiguration] = [:]
 
     // Prefix and selected item pair
     typealias Selection = (
@@ -31,19 +37,29 @@ public class AutoCompleteManager: NSObject {
     )
     var selection: Selection?
 
-    func setup(textView: ALKChatBarTextView, tableview: UITableView) {
+    init(
+        textView: ALKChatBarTextView,
+        tableview: UITableView
+        ) {
         self.textView = textView
+        self.autocompletionView = tableview
+        super.init()
+
         self.textView.add(delegate: self)
-        autocompletionView = tableview
         autocompletionView.dataSource = self
         autocompletionView.delegate = self
         autoCompletionViewHeightConstraint = autocompletionView.heightAnchor.constraint(equalToConstant: 0)
         autoCompletionViewHeightConstraint?.isActive = true
     }
 
-    func registerPrefix(prefix: String, attributes: [NSAttributedString.Key: Any]) {
+    func registerPrefix(
+        prefix: String,
+        attributes: [NSAttributedString.Key: Any],
+        configuration: AutoCompleteConfiguration = AutoCompleteConfiguration()
+        ) {
         autocompletionPrefixes.insert(prefix)
         autocompletionPrefixAttributes[prefix] = attributes
+        prefixConfigurations[prefix] = configuration
     }
 
     func reloadAutoCompletionView() {
@@ -77,17 +93,26 @@ public class AutoCompleteManager: NSObject {
         }
         // prefix to identify which autocomplete is present
         newAttributes[AutoCompleteItem.attributesKey] = selection.prefix + item.key
+        let configuration = prefixConfigurations[selection.prefix] ?? AutoCompleteConfiguration()
+        let prefix = configuration.insertWithPrefix ? selection.prefix:""
 
         let insertionItemString = NSAttributedString(
-            string: selection.prefix + item.content,
+            string: prefix + item.content,
             attributes: newAttributes
         )
-
+        var insertionRange = insertionRange
+        if !configuration.insertWithPrefix {
+            insertionRange = NSRange(
+                location: insertionRange.location-prefix.utf16.count,
+                length: insertionRange.length+prefix.utf16.count)
+        }
         let newAttributedText = textView.attributedText.replacingCharacters(
             in: insertionRange,
             with: insertionItemString
         )
-        newAttributedText.append(NSAttributedString(string: " ", attributes: defaultAttributes))
+        if configuration.addSpaceAfterInserting {
+            newAttributedText.append(NSAttributedString(string: " ", attributes: defaultAttributes))
+        }
         textView.attributedText = newAttributedText
     }
 }
