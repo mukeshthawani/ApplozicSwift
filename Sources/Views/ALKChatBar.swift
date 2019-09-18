@@ -38,13 +38,6 @@ open class ALKChatBar: UIView, Localizable {
     }
 
     public var isMicButtonHidden: Bool!
-//    public weak var autocompletionDelegate: AutoCompletionDelegate?
-
-    // TODO: not sure chat bar should be aware of
-    // autocompletemanager, right now adding here
-    // as when textview's delegate gets triggered it will call
-    // manager's methods
-    public var autoCompleteManager: AutoCompleteManager!
 
     public enum ButtonMode {
         case send
@@ -305,7 +298,7 @@ open class ALKChatBar: UIView, Localizable {
         micButton.setAudioRecDelegate(recorderDelegate: self)
         soundRec.setAudioRecViewDelegate(recorderDelegate: self)
         textView.typingAttributes = defaultTextAttributes
-        textView.delegate = self
+        textView.add(delegate: self)
         backgroundColor = .background(.grayEF)
         translatesAutoresizingMaskIntoConstraints = false
 
@@ -326,19 +319,6 @@ open class ALKChatBar: UIView, Localizable {
         updateMediaViewVisibility()
     }
 
-//    func setupAutoCompletion(_ tableview: UITableView) {
-//        autocompletionView = tableview
-//        autocompletionView.dataSource = self
-//        autocompletionView.delegate = self
-//        autoCompletionViewHeightConstraint = autocompletionView.heightAnchor.constraint(equalToConstant: 0)
-//        autoCompletionViewHeightConstraint?.isActive = true
-//    }
-//
-//    func registerPrefix(prefix: String, attributes: [NSAttributedString.Key: Any]) {
-//        autocompletionPrefixes.insert(prefix)
-//        autocompletionPrefixAttributes[prefix] = attributes
-//    }
-
     func setComingSoonDelegate(delegate: UIView) {
         comingSoonDelegate = delegate
     }
@@ -348,7 +328,6 @@ open class ALKChatBar: UIView, Localizable {
         clearTextInTextView()
         textView.attributedText = nil
         toggleKeyboardType(textView: textView)
-//        hideAutoCompletionView()
     }
 
     func hideMicButton() {
@@ -692,23 +671,9 @@ open class ALKChatBar: UIView, Localizable {
 }
 
 extension ALKChatBar: UITextViewDelegate {
-    public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText string: String) -> Bool {
-        // TODO: find a better way to call this
-        _ = autoCompleteManager.textView(textView, shouldChangeTextIn: range, replacementText: string)
-        return true
-    }
-
-    public func textViewDidChangeSelection(_ textView: UITextView) {
-        autoCompleteManager.textViewDidChangeSelection(textView)
-    }
 
     public func textViewDidChange(_ textView: UITextView) {
         textView.typingAttributes = defaultTextAttributes
-        // TODO: post notification or create multicast delegate
-        // pefer multicast delegate but notification posting is easy
-        // and we can check for equality
-        // https://github.com/nathantannar4/InputBarAccessoryView/search?q=UITextView.textDidChangeNotification&unscoped_q=UITextView.textDidChangeNotification
-        // and messaviewcontroller for multiple delegates
         if textView.text.isEmpty {
             clearTextInTextView()
         } else {
@@ -820,77 +785,5 @@ extension ALKChatBar: ALKAudioRecorderViewProtocol {
     public func cancelAudioRecording() {
         micButton.cancelAudioRecord()
         stopRecording()
-    }
-}
-
-extension UITextView {
-    func find(prefixes: Set<String>) -> (prefix: String, word: String, range: NSRange)? {
-        guard !prefixes.isEmpty,
-            let result = wordAtCaret,
-            !result.word.isEmpty
-        else { return nil }
-        for prefix in prefixes {
-            if result.word.hasPrefix(prefix) {
-                return (prefix, result.word, result.range)
-            }
-        }
-        return nil
-    }
-
-    var wordAtCaret: (word: String, range: NSRange)? {
-        guard let caretRange = self.caretRange,
-            let result = text.word(at: caretRange)
-        else { return nil }
-
-        // TODO: should be replaced with this code:
-        // NSRange(result.range, in: text)
-        let location = result.range.lowerBound.encodedOffset
-        let range = NSRange(location: location, length: result.range.upperBound.encodedOffset - location)
-
-        return (result.word, range)
-    }
-
-    var caretRange: NSRange? {
-        guard let selectedRange = self.selectedTextRange else { return nil }
-        return NSRange(
-            location: offset(from: beginningOfDocument, to: selectedRange.start),
-            length: offset(from: selectedRange.start, to: selectedRange.end)
-        )
-    }
-}
-
-extension String {
-    func wordParts(_ range: Range<String.Index>) -> (left: String.SubSequence, right: String.SubSequence)? {
-        let whitespace = NSCharacterSet.whitespacesAndNewlines
-        let leftView = self[..<range.upperBound]
-        let leftIndex = leftView.rangeOfCharacter(from: whitespace, options: .backwards)?.upperBound
-            ?? leftView.startIndex
-
-        let rightView = self[range.upperBound...]
-        let rightIndex = rightView.rangeOfCharacter(from: whitespace)?.lowerBound
-            ?? endIndex
-
-        return (leftView[leftIndex...], rightView[..<rightIndex])
-    }
-
-    func word(at nsrange: NSRange) -> (word: String, range: Range<String.Index>)? {
-        guard !isEmpty,
-            let range = Range(nsrange, in: self),
-            let parts = self.wordParts(range)
-        else { return nil }
-
-        // if the left-next character is whitespace, the "right word part" is the full word
-        // short circuit with the right word part + its range
-        if let characterBeforeRange = index(range.lowerBound, offsetBy: -1, limitedBy: startIndex),
-            let character = self[characterBeforeRange].unicodeScalars.first,
-            NSCharacterSet.whitespaces.contains(character) {
-            let right = parts.right
-            return (String(right), right.startIndex ..< right.endIndex)
-        }
-
-        let joinedWord = String(parts.left + parts.right)
-        guard !joinedWord.isEmpty else { return nil }
-
-        return (joinedWord, parts.left.startIndex ..< parts.right.endIndex)
     }
 }

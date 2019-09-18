@@ -386,18 +386,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
     open override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()
-        autocompletionView.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
-        autocompletionView.register(MentionAutoSuggestionCell.self)
-        autocompleteManager.setupAutoCompletion(autocompletionView)
-        autocompleteManager.registerPrefix(prefix: "/", attributes: [:])
-        autocompleteManager.registerPrefix(
-            prefix: MemberMention.Prefix,
-            attributes: [
-                .foregroundColor: UIColor.blue,
-                .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
-            ]
-        )
-        chatBar.autoCompleteManager = autocompleteManager
+        setupAutoComplete()
         setRichMessageKitTheme()
         setupProfanityFilter()
     }
@@ -868,6 +857,20 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         } catch {
             print("Error while setting up profanity filter: \(error.localizedDescription)")
         }
+    }
+
+    private func setupAutoComplete() {
+        autocompletionView.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
+        autocompletionView.register(MentionAutoSuggestionCell.self)
+        autocompleteManager.setup(textView: chatBar.textView, tableview: tableView)
+        autocompleteManager.registerPrefix(prefix: "/", attributes: [:])
+        autocompleteManager.registerPrefix(
+            prefix: MemberMention.Prefix,
+            attributes: [
+                .foregroundColor: UIColor.blue,
+                .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
+            ]
+        )
     }
 
     // MARK: public Control Typing notification

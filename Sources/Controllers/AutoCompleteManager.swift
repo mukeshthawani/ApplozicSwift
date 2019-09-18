@@ -13,7 +13,7 @@ public protocol AutoCompletionDelegate: AnyObject {
 
 public class AutoCompleteManager: NSObject {
     public var autocompletionView: UITableView!
-    public var textView: UITextView!
+    public var textView: ALKChatBarTextView!
     public weak var autocompletionDelegate: AutoCompletionDelegate?
 
     public var autoCompletionItems = [AutoCompleteItem]()
@@ -31,7 +31,9 @@ public class AutoCompleteManager: NSObject {
     )
     var selection: Selection?
 
-    func setupAutoCompletion(_ tableview: UITableView) {
+    func setup(textView: ALKChatBarTextView, tableview: UITableView) {
+        self.textView = textView
+        self.textView.add(delegate: self)
         autocompletionView = tableview
         autocompletionView.dataSource = self
         autocompletionView.delegate = self
@@ -90,7 +92,8 @@ public class AutoCompleteManager: NSObject {
     }
 }
 
-extension AutoCompleteManager {
+extension AutoCompleteManager: UITextViewDelegate {
+
     public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText string: String) -> Bool {
             guard var text = textView.text as NSString? else {
                 return true
