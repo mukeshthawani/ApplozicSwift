@@ -33,6 +33,8 @@ open class ALKChatBarTextView: UITextView {
             let didChange = super.attributedText != newValue
             super.attributedText = newValue
             if didChange {
+                // TODO: in case of first empty it resets to min. height
+                // nothing to change here, just adding a comment
                 delegate?.textViewDidChange?(self)
             }
         }

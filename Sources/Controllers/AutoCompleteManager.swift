@@ -66,7 +66,6 @@ public class AutoCompleteManager: NSObject {
         return true
     }
 
-
     func insert(item: AutoCompleteItem, at insertionRange: NSRange, replace selection: Selection) {
         let defaultAttributes = textView.typingAttributes
         var newAttributes = defaultAttributes
@@ -87,11 +86,6 @@ public class AutoCompleteManager: NSObject {
             with: insertionItemString
         )
         newAttributedText.append(NSAttributedString(string: " ", attributes: defaultAttributes))
-
-        // If we replace the text here then it resizes the textview incorrectly.
-        // That's why first resetting the text and then inserting the item content.
-        // Also, to prevent keyboard autocorrect from cloberring the insert.
-        textView.attributedText = NSAttributedString()
         textView.attributedText = newAttributedText
     }
 }
@@ -128,9 +122,6 @@ extension AutoCompleteManager {
                     })
                 }
             }
-
-            text = text.replacingCharacters(in: range, with: string) as NSString
-//            updateTextViewHeight(textView: textView, text: text as String)
             return true
         }
 

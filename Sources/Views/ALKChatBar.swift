@@ -255,21 +255,6 @@ open class ALKChatBar: UIView, Localizable {
 
     fileprivate var textViewTrailingWithSend: NSLayoutConstraint?
     fileprivate var textViewTrailingWithMic: NSLayoutConstraint?
-//    fileprivate var autoCompletionViewHeightConstraint: NSLayoutConstraint?
-
-//    public var autoCompletionItems = [AutoCompleteItem]()
-//    var filteredAutocompletionItems = [AutoCompleteItem]()
-
-//    private var autocompletionPrefixes: Set<String> = []
-//    private var autocompletionPrefixAttributes: [String: [NSAttributedString.Key: Any]] = [:]
-
-    // Prefix and selected item pair
-//    typealias Selection = (
-//        prefix: String,
-//        range: NSRange,
-//        word: String
-//    )
-//    var selection: Selection?
 
     private enum ConstraintIdentifier: String {
         case mediaBackgroudViewHeight
@@ -660,10 +645,6 @@ open class ALKChatBar: UIView, Localizable {
     }
 
     func updateTextViewHeight(textView: UITextView, text: String) {
-//        let style = NSMutableParagraphStyle()
-//        style.lineSpacing = 4.0
-//        let font = textView.font ?? UIFont.font(.normal(size: 14.0))
-//        let attributes = [NSAttributedString.Key.paragraphStyle: style, NSAttributedString.Key.font: font]
         let attributes = textView.typingAttributes
         let tv = UITextView(frame: textView.frame)
         tv.attributedText = NSAttributedString(string: text, attributes: attributes)
@@ -712,54 +693,13 @@ open class ALKChatBar: UIView, Localizable {
 
 extension ALKChatBar: UITextViewDelegate {
     public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText string: String) -> Bool {
-        return autoCompleteManager.textView(textView, shouldChangeTextIn: range, replacementText: string)
-//        autoCompleteManager.should
-//        guard var text = textView.text as NSString? else {
-//            return true
-//        }
-//
-//        // check if deleting an autocomplete item, if yes then
-//        // remove full item in one go and clear the attributes
-//        //
-//        // range.length == 1: Remove single character
-//        // range.lowerBound < textView.selectedRange.lowerBound: Ignore trying to delete
-//        //      the substring if the user is already doing so
-//        if range.length == 1, range.lowerBound < textView.selectedRange.lowerBound {
-//            // Backspace/removing text
-//            let attribute = textView.attributedText
-//                .attributes(at: range.lowerBound, longestEffectiveRange: nil, in: range)
-//                .filter { $0.key == AutoCompleteItem.attributesKey }
-//
-//            if let isAutocomplete = attribute[AutoCompleteItem.attributesKey] as? String, !isAutocomplete.isEmpty {
-//                // Remove the autocompleted substring
-//                let lowerRange = NSRange(location: 0, length: range.location + 1)
-//                textView.attributedText.enumerateAttribute(AutoCompleteItem.attributesKey, in: lowerRange, options: .reverse, using: { _, range, stop in
-//
-//                    // Only delete the first found range
-//                    defer { stop.pointee = true }
-//
-//                    let emptyString = NSAttributedString(string: "", attributes: textView.typingAttributes)
-//                    textView.attributedText = textView.attributedText.replacingCharacters(in: range, with: emptyString)
-//                    textView.selectedRange = NSRange(location: range.location, length: 0)
-//                })
-//            }
-//        }
-//
-//        text = text.replacingCharacters(in: range, with: string) as NSString
-//        updateTextViewHeight(textView: textView, text: text as String)
-//        return true
+        // TODO: find a better way to call this
+        _ = autoCompleteManager.textView(textView, shouldChangeTextIn: range, replacementText: string)
+        return true
     }
 
     public func textViewDidChangeSelection(_ textView: UITextView) {
         autoCompleteManager.textViewDidChangeSelection(textView)
-//        guard let result = textView.find(prefixes: autocompletionPrefixes) else {
-//            hideAutoCompletionView()
-//            return
-//        }
-//
-//        selection = (result.prefix, result.range, String(result.word.dropFirst(result.prefix.count)))
-//        // Call delegate and get items
-//        autocompletionDelegate?.didMatch(prefix: result.prefix, message: String(result.word.dropFirst(result.prefix.count)))
     }
 
     public func textViewDidChange(_ textView: UITextView) {
@@ -776,6 +716,7 @@ extension ALKChatBar: UITextViewDelegate {
             placeHolder.alpha = 0
 
             toggleButtonInChatBar(hide: false)
+            updateTextViewHeight(textView: textView, text: textView.text)
         }
 
         if let selectedTextRange = textView.selectedTextRange {
@@ -840,55 +781,11 @@ extension ALKChatBar: UITextViewDelegate {
         textView.reloadInputViews()
     }
 
-    func reloadAutoCompletionView() {
-        autocompletionView.reloadData()
-    }
-
-//    func showAutoCompletionView() {
-//        let contentHeight = autocompletionView.contentSize.height
-//
-//        let bottomPadding: CGFloat = contentHeight > 0 ? 25 : 0
-//        let maxheight: CGFloat = 200
-//        autoCompletionViewHeightConstraint?.constant = contentHeight < maxheight ? contentHeight + bottomPadding : maxheight
-//    }
-
-//    func hideAutoCompletionView() {
-//        autoCompletionViewHeightConstraint?.constant = 0
-//    }
-
     func textStartsWithPrefix(_ text: String, prefix: String) -> Bool {
         guard !prefix.isEmpty, text.starts(with: prefix) else { return false }
         if text.count > 1, text[1] == " " { return false }
         return true
     }
-
-//    func insert(item: AutoCompleteItem, at insertionRange: NSRange, replace selection: Selection) {
-//        let defaultAttributes = textView.typingAttributes
-//        var newAttributes = defaultAttributes
-//        if let prefixAttributes = autocompletionPrefixAttributes[selection.prefix] {
-//            // pass prefix attributes for the range and override old value if present
-//            newAttributes.merge(prefixAttributes) { $1 }
-//        }
-//        // prefix to identify which autocomplete is present
-//        newAttributes[AutoCompleteItem.attributesKey] = selection.prefix + item.key
-//
-//        let insertionItemString = NSAttributedString(
-//            string: selection.prefix + item.content,
-//            attributes: newAttributes
-//        )
-//
-//        let newAttributedText = textView.attributedText.replacingCharacters(
-//            in: insertionRange,
-//            with: insertionItemString
-//        )
-//        newAttributedText.append(NSAttributedString(string: " ", attributes: defaultAttributes))
-//
-//        // If we replace the text here then it resizes the textview incorrectly.
-//        // That's why first resetting the text and then inserting the item content.
-//        // Also, to prevent keyboard autocorrect from cloberring the insert.
-//        textView.attributedText = NSAttributedString()
-//        textView.attributedText = newAttributedText
-//    }
 }
 
 extension ALKChatBar: ALKAudioRecorderProtocol {
