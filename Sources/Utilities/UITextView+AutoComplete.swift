@@ -26,8 +26,6 @@ extension UITextView {
             let result = text.word(at: caretRange)
         else { return nil }
 
-        // TODO: should be replaced with this code:
-        // NSRange(result.range, in: text)
         let location = result.range.lowerBound.encodedOffset
         let range = NSRange(location: location, length: result.range.upperBound.encodedOffset - location)
 
