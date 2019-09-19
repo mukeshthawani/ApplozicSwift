@@ -51,7 +51,7 @@ open class ALKChatBarTextView: UITextView {
 
     open override var delegate: UITextViewDelegate? {
         get { return self }
-        set {}
+        set { _ = newValue } // To satisfy the linter otherwise this would be an empty setter
     }
 
     private let delegates: NSHashTable<UITextViewDelegate> = NSHashTable.weakObjects()
@@ -61,10 +61,8 @@ open class ALKChatBarTextView: UITextView {
     }
 
     func remove(delegate: UITextViewDelegate) {
-        for oneDelegate in delegates.allObjects.reversed() {
-            if oneDelegate === delegate {
-                delegates.remove(oneDelegate)
-            }
+        for oneDelegate in delegates.allObjects.reversed() where oneDelegate === delegate {
+            delegates.remove(oneDelegate)
         }
     }
 

@@ -5,14 +5,14 @@
 //  Created by Mukesh on 19/09/19.
 //
 
-import Foundation
 import Applozic
+import Foundation
 
 extension ALChannelDBService {
     func membersInGroup(
         channelKey: NSNumber,
         completion: @escaping ((Set<ALContact>?) -> Void)
-        ) {
+    ) {
         fetchChannelMembersAsync(withChannelKey: channelKey) { members in
             guard let members = members as? [String], !members.isEmpty else {
                 completion(nil)
