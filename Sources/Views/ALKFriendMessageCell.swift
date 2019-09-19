@@ -282,7 +282,11 @@ open class ALKFriendMessageCell: ALKMessageCell {
     }
 
     override func update(viewModel: ALKMessageViewModel) {
-        super.update(viewModel: viewModel, style: ALKMessageStyle.receivedMessage)
+        super.update(
+            viewModel: viewModel,
+            messageStyle: ALKMessageStyle.receivedMessage,
+            mentionStyle: ALKMessageStyle.receivedMention
+        )
 
         if viewModel.isReplyMessage {
             guard
@@ -323,7 +327,13 @@ open class ALKFriendMessageCell: ALKMessageCell {
         let messageWidth = width - (leftSpacing + rightSpacing)
 
         /// Calculating messageHeight
-        let messageHeight = super.messageHeight(viewModel: viewModel, width: messageWidth, font: ALKMessageStyle.receivedMessage.font, displayNames: displayNames)
+        let messageHeight = super
+            .messageHeight(
+                viewModel: viewModel,
+                width: messageWidth,
+                font: ALKMessageStyle.receivedMessage.font,
+                mentionStyle: ALKMessageStyle.receivedMention,
+                displayNames: displayNames)
         let heightPadding = Padding.NameLabel.top + Padding.NameLabel.height + Padding.ReplyView.top + Padding.MessageView.top + Padding.MessageView.bottom + Padding.BubbleView.bottom
 
         let totalHeight = max(messageHeight + heightPadding, minimumHeight)

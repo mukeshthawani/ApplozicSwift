@@ -13,6 +13,18 @@ import UIKit
  to a message */
 
 open class ALKReplyMessageView: UIView, Localizable {
+    public enum Theme {
+        public static var message = Style(
+            font: Font.normal(size: 14).font(),
+            text: .text(.black00)
+        )
+        public static var mention = Style(
+            font: Font.normal(size: 14).font(),
+            text: .blue,
+            background: UIColor.blue.withAlphaComponent(0.1)
+        )
+    }
+
     var configuration: ALKConfiguration!
 
     open var nameLabel: UILabel = {
@@ -102,7 +114,6 @@ open class ALKReplyMessageView: UIView, Localizable {
         messageLabel.text = getMessageText()
         if let attributedText = attributedTextWithMentions(
             message,
-            Font.normal(size: 14).font(),
             displayNames: displayNames
         ) {
             messageLabel.attributedText = attributedText
@@ -118,6 +129,7 @@ open class ALKReplyMessageView: UIView, Localizable {
     // MARK: - Internal methods
 
     private func setUpViews() {
+        messageLabel.setStyle(Theme.message)
         setUpConstraints()
         closeButton.addTarget(self, action: #selector(closeButtonTapped(_:)), for: .touchUpInside)
     }
@@ -293,13 +305,17 @@ open class ALKReplyMessageView: UIView, Localizable {
 
     private func attributedTextWithMentions(
         _ viewModel: ALKMessageViewModel,
-        _ font: UIFont,
         displayNames: ((Set<String>) -> ([String: String]?))?
     ) -> NSAttributedString? {
-        let defaultAttributes: [NSAttributedString.Key: Any] = [.font: font]
-        let colorAttributes: [NSAttributedString.Key: Any] = [
-            .foregroundColor: UIColor.blue,
-            .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
+        let defaultAttributes: [NSAttributedString.Key: Any] = [
+            .font: Theme.message.font,
+            .foregroundColor: Theme.message.text,
+            .backgroundColor: Theme.message.background,
+        ]
+        let mentionAttributes: [NSAttributedString.Key: Any] = [
+            .font: Theme.mention.font,
+            .foregroundColor: Theme.mention.text,
+            .backgroundColor: Theme.mention.background,
         ]
         if viewModel.containsMentions,
             let userIds = viewModel.mentionedUserIds,
@@ -307,7 +323,7 @@ open class ALKReplyMessageView: UIView, Localizable {
             let attributedText = viewModel
             .attributedMessageWithMentions(
                 displayNames: names,
-                attributesForMention: colorAttributes,
+                attributesForMention: mentionAttributes,
                 defaultAttributes: defaultAttributes
             ) {
             return attributedText

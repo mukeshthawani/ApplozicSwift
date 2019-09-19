@@ -16,7 +16,8 @@ class ALKImageView: UIImageView {
     }
 }
 
-open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItemProtocol, ALKReplyMenuItemProtocol, ALKReportMessageMenuItemProtocol {
+// swiftlint:disable:next type_body_length
+open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel> {
     /// Dummy view required to calculate height for normal text.
     fileprivate static var dummyMessageView: ALKTextView = {
         let textView = ALKTextView(frame: .zero)
@@ -136,7 +137,11 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
     var replyViewAction: (() -> Void)?
     var displayNames: ((Set<String>) -> ([String: String]?))?
 
-    func update(viewModel: ALKMessageViewModel, style: Style) {
+    func update(
+        viewModel: ALKMessageViewModel,
+        messageStyle: Style,
+        mentionStyle: Style
+    ) {
         self.viewModel = viewModel
 
         if viewModel.isReplyMessage {
@@ -153,7 +158,8 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
                 let attributedText = ALKMessageCell
                 .attributedTextWithMentions(
                     actualMessage,
-                    style.font,
+                    defaultAttributes: [:],
+                    mentionStyle: mentionStyle,
                     displayNames: displayNames
                 ) {
                 replyMessageLabel.attributedText = attributedText
@@ -172,7 +178,7 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
         }
 
         timeLabel.text = viewModel.time
-        resetTextView(style)
+        resetTextView(messageStyle)
         guard let message = viewModel.message else { return }
 
         switch viewModel.messageType {
@@ -183,7 +189,8 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             if let attributedText = ALKMessageCell
                 .attributedTextWithMentions(
                     viewModel,
-                    style.font,
+                    defaultAttributes: messageView.typingAttributes,
+                    mentionStyle: mentionStyle,
                     displayNames: displayNames
                 ) {
                 messageView.attributedText = attributedText
@@ -241,6 +248,7 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
     class func messageHeight(viewModel: ALKMessageViewModel,
                              width: CGFloat,
                              font: UIFont,
+                             mentionStyle: Style,
                              displayNames: ((Set<String>) -> ([String: String]?))?) -> CGFloat {
         dummyMessageView.font = font
 
@@ -254,7 +262,8 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             if let attributedText = ALKMessageCell
                 .attributedTextWithMentions(
                     viewModel,
-                    font,
+                    defaultAttributes: dummyMessageView.typingAttributes,
+                    mentionStyle: mentionStyle,
                     displayNames: displayNames
                 ) {
                 return TextViewSizeCalculator.height(dummyMessageView, attributedText: attributedText, maxWidth: width)
@@ -287,18 +296,6 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             print("😱😱😱Shouldn't come here.😱😱😱")
             return 0
         }
-    }
-
-    func menuCopy(_: Any) {
-        UIPasteboard.general.string = viewModel?.message ?? ""
-    }
-
-    func menuReply(_: Any) {
-        menuAction?(.reply)
-    }
-
-    func menuReport(_: Any) {
-        menuAction?(.reportMessage)
     }
 
     func getMessageFor(key: String) -> ALKMessageViewModel? {
@@ -457,13 +454,14 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
 
     private class func attributedTextWithMentions(
         _ viewModel: ALKMessageViewModel,
-        _ font: UIFont,
+        defaultAttributes: [NSAttributedString.Key: Any],
+        mentionStyle: Style,
         displayNames: ((Set<String>) -> ([String: String]?))?
     ) -> NSAttributedString? {
-        let defaultAttributes: [NSAttributedString.Key: Any] = [.font: font]
-        let colorAttributes: [NSAttributedString.Key: Any] = [
-            .foregroundColor: UIColor.blue,
-            .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
+        let mentionAttributes: [NSAttributedString.Key: Any] = [
+            .font: mentionStyle.font,
+            .foregroundColor: mentionStyle.text,
+            .backgroundColor: mentionStyle.background,
         ]
         if viewModel.containsMentions,
             let userIds = viewModel.mentionedUserIds,
@@ -471,7 +469,7 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel>, ALKCopyMenuItem
             let attributedText = viewModel
             .attributedMessageWithMentions(
                 displayNames: names,
-                attributesForMention: colorAttributes,
+                attributesForMention: mentionAttributes,
                 defaultAttributes: defaultAttributes
             ) {
             return attributedText

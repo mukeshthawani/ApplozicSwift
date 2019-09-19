@@ -79,7 +79,7 @@ class MentionAutoCompleteCell: UITableViewCell {
             profile.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -Padding.Profile.bottom),
             nameLabel.leadingAnchor.constraint(equalTo: profile.trailingAnchor, constant: Padding.Name.left),
             nameLabel.centerYAnchor.constraint(equalTo: profile.centerYAnchor),
-            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Padding.Name.right)
-            ])
+            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Padding.Name.right),
+        ])
     }
 }
