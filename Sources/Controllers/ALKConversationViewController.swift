@@ -34,7 +34,8 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
     public lazy var chatBar = ALKChatBar(frame: CGRect.zero, configuration: self.configuration)
     public lazy var autocompleteManager = AutoCompleteManager(
         textView: chatBar.textView,
-        tableview: autocompletionView)
+        tableview: autocompletionView
+    )
 
     public let autocompletionView: UITableView = {
         let tableview = UITableView(frame: CGRect.zero, style: .plain)
@@ -742,9 +743,9 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                 }
 
                 var messageMetadata = self?.configuration.messageMetadata
-                let mentionHandler = MessageMentionHandler(message: message)
+                let mentionHandler = MessageMentionEncoder(message: message)
                 var messageToSend = message.string
-                if mentionHandler.containsAutosuggestions() {
+                if mentionHandler.containsMentions {
                     messageToSend = mentionHandler.replaceMentionsWithKeys().string
                     let metadataForMentions = mentionHandler.metadataForMentions() ?? [:]
                     // In case of a key match using the value set in config
@@ -861,19 +862,11 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
 
     private func setupAutoComplete() {
         autocompletionView.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
-        autocompletionView.register(MentionAutoSuggestionCell.self)
+        autocompletionView.register(MentionAutoCompleteCell.self)
         autocompleteManager.autocompletionDelegate = self
-        autocompleteManager.registerPrefix(prefix: "/", attributes: [:])
-        autocompleteManager.registerPrefix(
-            prefix: MemberMention.Prefix,
-            attributes: [
-                .foregroundColor: UIColor.blue,
-                .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
-            ]
-        )
         if configuration.isMemberMentionEnabled {
             autocompleteManager.registerPrefix(
-                prefix: MemberMention.Prefix,
+                prefix: MessageMention.Prefix,
                 attributes: [
                     .foregroundColor: UIColor.blue,
                     .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
@@ -2044,27 +2037,5 @@ extension ALKConversationViewController: ALAlertButtonClickProtocol {
             muteConversationVC.modalPresentationStyle = .overCurrentContext
             present(muteConversationVC, animated: true, completion: nil)
         }
-    }
-}
-
-// Override this in the agent app and if you want to support
-// other prefixes then call super.
-extension ALKConversationViewController: AutoCompletionDelegate {
-    public func didMatch(prefix: String, message: String) {
-        guard prefix == MemberMention.Prefix else { return }
-
-        let items = viewModel.fetchGroupMembersForAutocompletion()
-        // update auto completion items based on the prefix
-        if message.isEmpty {
-            autocompleteManager.filteredAutocompletionItems = items
-        } else {
-            autocompleteManager.filteredAutocompletionItems = items.filter { $0.content.lowercased().contains(message) }
-        }
-
-        // then reload and show the suggestion view
-        UIView.performWithoutAnimation {
-            self.autocompleteManager.reloadAutoCompletionView()
-        }
-        autocompleteManager.showAutoCompletionView()
     }
 }

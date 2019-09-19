@@ -49,9 +49,9 @@ public class AutoCompleteManager: NSObject {
     init(
         textView: ALKChatBarTextView,
         tableview: UITableView
-        ) {
+    ) {
         self.textView = textView
-        self.autocompletionView = tableview
+        autocompletionView = tableview
         super.init()
 
         self.textView.add(delegate: self)
@@ -65,7 +65,7 @@ public class AutoCompleteManager: NSObject {
         prefix: String,
         attributes: [NSAttributedString.Key: Any],
         configuration: AutoCompleteConfiguration = AutoCompleteConfiguration()
-        ) {
+    ) {
         autocompletionPrefixes.insert(prefix)
         autocompletionPrefixAttributes[prefix] = attributes
         prefixConfigurations[prefix] = configuration
@@ -105,7 +105,7 @@ public class AutoCompleteManager: NSObject {
             newAttributes[AutoCompleteItem.attributesKey] = selection.prefix + item.key
         }
 
-        let prefix = configuration.insertWithPrefix ? selection.prefix:""
+        let prefix = configuration.insertWithPrefix ? selection.prefix : ""
         let insertionItemString = NSAttributedString(
             string: prefix + item.content,
             attributes: newAttributes
@@ -113,8 +113,9 @@ public class AutoCompleteManager: NSObject {
         var insertionRange = insertionRange
         if !configuration.insertWithPrefix {
             insertionRange = NSRange(
-                location: insertionRange.location-prefix.utf16.count,
-                length: insertionRange.length+prefix.utf16.count)
+                location: insertionRange.location - prefix.utf16.count,
+                length: insertionRange.length + prefix.utf16.count
+            )
         }
         let newAttributedText = textView.attributedText.replacingCharacters(
             in: insertionRange,
@@ -128,12 +129,11 @@ public class AutoCompleteManager: NSObject {
 }
 
 extension AutoCompleteManager: UITextViewDelegate {
-
     public func textView(
         _ textView: UITextView,
         shouldChangeTextIn range: NSRange,
-        replacementText string: String
-        ) -> Bool {
+        replacementText _: String
+    ) -> Bool {
         guard var text = textView.text as NSString? else {
             return true
         }

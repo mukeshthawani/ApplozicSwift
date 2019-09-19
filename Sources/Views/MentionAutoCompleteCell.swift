@@ -8,7 +8,7 @@
 import Kingfisher
 import UIKit
 
-class MentionAutoSuggestionCell: UITableViewCell {
+class MentionAutoCompleteCell: UITableViewCell {
     struct Padding {
         struct Profile {
             static let left: CGFloat = 20
@@ -71,15 +71,15 @@ class MentionAutoSuggestionCell: UITableViewCell {
 
     private func setupConstraints() {
         contentView.addViewsForAutolayout(views: [profile, nameLabel])
-
-        profile.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Padding.Profile.left).isActive = true
-        profile.widthAnchor.constraint(equalToConstant: Padding.Profile.width).isActive = true
-        profile.heightAnchor.constraint(equalToConstant: Padding.Profile.height).isActive = true
-        profile.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Padding.Profile.top).isActive = true
-        profile.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -Padding.Profile.bottom).isActive = true
-
-        nameLabel.leadingAnchor.constraint(equalTo: profile.trailingAnchor, constant: Padding.Name.left).isActive = true
-        nameLabel.centerYAnchor.constraint(equalTo: profile.centerYAnchor).isActive = true
-        nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Padding.Name.right).isActive = true
+        NSLayoutConstraint.activate([
+            profile.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: Padding.Profile.left),
+            profile.widthAnchor.constraint(equalToConstant: Padding.Profile.width),
+            profile.heightAnchor.constraint(equalToConstant: Padding.Profile.height),
+            profile.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Padding.Profile.top),
+            profile.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -Padding.Profile.bottom),
+            nameLabel.leadingAnchor.constraint(equalTo: profile.trailingAnchor, constant: Padding.Name.left),
+            nameLabel.centerYAnchor.constraint(equalTo: profile.centerYAnchor),
+            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -Padding.Name.right)
+            ])
     }
 }

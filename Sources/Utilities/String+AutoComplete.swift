@@ -25,7 +25,7 @@ extension String {
         guard !isEmpty,
             let range = Range(nsrange, in: self),
             let parts = self.wordParts(range)
-            else { return nil }
+        else { return nil }
 
         // if the left-next character is whitespace, the "right word part" is the full word
         // short circuit with the right word part + its range

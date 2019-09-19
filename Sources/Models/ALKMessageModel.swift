@@ -119,13 +119,13 @@ extension ALKMessageViewModel {
         return mentionParser?.mentionedUserIds()
     }
 
-    private var mentionParser: MessageMentionParser? {
+    private var mentionParser: MessageMentionDecoder? {
         guard let message = message,
             let metadata = metadata,
             !metadata.isEmpty else {
             return nil
         }
-        let mentionParser = MessageMentionParser(message: message, metadata: metadata)
+        let mentionParser = MessageMentionDecoder(message: message, metadata: metadata)
         return mentionParser
     }
 

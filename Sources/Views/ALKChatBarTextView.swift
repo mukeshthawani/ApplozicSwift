@@ -68,7 +68,7 @@ open class ALKChatBarTextView: UITextView {
         }
     }
 
-    fileprivate func invoke(invocation: (UITextViewDelegate) -> ()) {
+    fileprivate func invoke(invocation: (UITextViewDelegate) -> Void) {
         for delegate in delegates.allObjects.reversed() {
             invocation(delegate)
         }
@@ -76,9 +76,8 @@ open class ALKChatBarTextView: UITextView {
 }
 
 extension ALKChatBarTextView: UITextViewDelegate {
-
     public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        invoke{ _ = $0.textView?(textView, shouldChangeTextIn: range, replacementText: text) }
+        invoke { _ = $0.textView?(textView, shouldChangeTextIn: range, replacementText: text) }
         return true
     }
 

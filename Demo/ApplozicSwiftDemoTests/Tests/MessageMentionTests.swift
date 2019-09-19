@@ -26,21 +26,21 @@ class MessageMentionTests: XCTestCase {
     }
 
     func test_whenSendingValidRange() {
-        let parser = MessageMentionParser(
+        let decoder = MessageMentionDecoder(
             message: sampleMessage,
             metadata: sampleMetadataWithTwoIndices()
         )
         let attributedText =
-            parser.messageWithMentions(
+            decoder.messageWithMentions(
                 displayNamesOfUsers: [:],
                 attributesForMention: [:],
                 defaultAttributes: [:]
             )
-        XCTAssertTrue(parser.containsMentions)
+        XCTAssertTrue(decoder.containsMentions)
         XCTAssertNotNil(attributedText)
 
-        let firstMentionAttributes = [MemberMention.UserMentionKey: "@testdemo9"]
-        let secondMentionAttributes = [MemberMention.UserMentionKey: "@testdemo10"]
+        let firstMentionAttributes = [MessageMention.UserMentionKey: "@testdemo9"]
+        let secondMentionAttributes = [MessageMention.UserMentionKey: "@testdemo10"]
         let correctAttributedText =
             NSAttributedString(
                 string: "@testdemo9",
@@ -56,21 +56,21 @@ class MessageMentionTests: XCTestCase {
     }
 
     func test_whenSendingOneInvalidIndex() {
-        let parser = MessageMentionParser(
+        let decoder = MessageMentionDecoder(
             message: sampleMessage,
             metadata: sampleMetadataWithTwoIndices(
                 secondIndex: (15, 200)
             )
         )
-        XCTAssertTrue(parser.containsMentions)
+        XCTAssertTrue(decoder.containsMentions)
         let attributedText =
-            parser.messageWithMentions(
+            decoder.messageWithMentions(
                 displayNamesOfUsers: [:],
                 attributesForMention: [:],
                 defaultAttributes: [:]
             )
         XCTAssertNotNil(attributedText)
-        let attributes = [MemberMention.UserMentionKey: "@testdemo9"]
+        let attributes = [MessageMention.UserMentionKey: "@testdemo9"]
         let correctAttributedText =
             NSAttributedString(string: "@testdemo9", attributes: attributes) +
             NSAttributedString(string: " hi @testdemo10!")
@@ -78,16 +78,16 @@ class MessageMentionTests: XCTestCase {
     }
 
     func test_whenSendingAllInvalidIndices() {
-        let parser = MessageMentionParser(
+        let decoder = MessageMentionDecoder(
             message: sampleMessage,
             metadata: sampleMetadataWithTwoIndices(
                 firstIndex: (1, 10),
                 secondIndex: (15, 200)
             )
         )
-        XCTAssertFalse(parser.containsMentions)
+        XCTAssertFalse(decoder.containsMentions)
         XCTAssertNil(
-            parser.messageWithMentions(
+            decoder.messageWithMentions(
                 displayNamesOfUsers: [:],
                 attributesForMention: [:],
                 defaultAttributes: [:]

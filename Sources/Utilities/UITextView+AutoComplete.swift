@@ -12,7 +12,7 @@ extension UITextView {
         guard !prefixes.isEmpty,
             let result = wordAtCaret,
             !result.word.isEmpty
-            else { return nil }
+        else { return nil }
         for prefix in prefixes {
             if result.word.hasPrefix(prefix) {
                 return (prefix, result.word, result.range)
@@ -24,7 +24,7 @@ extension UITextView {
     var wordAtCaret: (word: String, range: NSRange)? {
         guard let caretRange = self.caretRange,
             let result = text.word(at: caretRange)
-            else { return nil }
+        else { return nil }
 
         // TODO: should be replaced with this code:
         // NSRange(result.range, in: text)

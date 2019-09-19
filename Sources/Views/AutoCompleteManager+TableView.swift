@@ -31,7 +31,7 @@ extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
 
         let prefix = selection.prefix
         if prefix == "@" {
-            let cell: MentionAutoSuggestionCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+            let cell: MentionAutoCompleteCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
             cell.updateView(item: item)
             return cell
         } else if prefix == "/" {

@@ -10,25 +10,6 @@ import Applozic
 import Foundation
 import UIKit
 
-public struct AutoCompleteItem {
-    var key: String
-    var content: String
-    var displayImageURL: URL?
-
-    /// A key used for referencing which substrings were autocompletes
-    static let attributesKey = NSAttributedString.Key("com.applozicswift.autocompletekey")
-
-    public init(key: String, content: String, displayImageURL: URL? = nil) {
-        self.key = key
-        self.content = content
-        self.displayImageURL = displayImageURL
-    }
-}
-
-//public protocol AutoCompletionDelegate: AnyObject {
-//    func didMatch(prefix: String, message: String)
-//}
-
 // swiftlint:disable:next type_body_length
 open class ALKChatBar: UIView, Localizable {
     var configuration: ALKConfiguration!
@@ -671,7 +652,6 @@ open class ALKChatBar: UIView, Localizable {
 }
 
 extension ALKChatBar: UITextViewDelegate {
-
     public func textViewDidChange(_ textView: UITextView) {
         textView.typingAttributes = defaultTextAttributes
         if textView.text.isEmpty {
