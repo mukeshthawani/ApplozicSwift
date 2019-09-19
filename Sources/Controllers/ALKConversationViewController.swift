@@ -871,6 +871,15 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                 .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
             ]
         )
+        if configuration.isMemberMentionEnabled {
+            autocompleteManager.registerPrefix(
+                prefix: MemberMention.Prefix,
+                attributes: [
+                    .foregroundColor: UIColor.blue,
+                    .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
+                ]
+            )
+        }
     }
 
     // MARK: public Control Typing notification
