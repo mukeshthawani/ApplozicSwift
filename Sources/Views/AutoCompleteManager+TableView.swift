@@ -27,17 +27,15 @@ extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
             let selection = selection else {
             return cell
         }
-        let item = items[indexPath.row]
 
-        let prefix = selection.prefix
-        if prefix == MessageMention.Prefix {
-            let cell: MentionAutoCompleteCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
-            cell.updateView(item: item)
-            return cell
-        } else {
-            cell.textLabel?.text = "\(item.content)"
+        let autoCompleteCellType = cellType(forPrefix: selection.prefix)
+        guard let autoCompleteCell = tableView.dequeueReusableCell(
+            withIdentifier: autoCompleteCellType.reuseIdentifier,
+            for: indexPath) as? AutoCompletionItemCell else {
+                return cell
         }
-        return cell
+        autoCompleteCell.updateView(item: items[indexPath.row])
+        return autoCompleteCell
     }
 
     public func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -47,5 +45,12 @@ extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
 
         insert(item: item, at: selection.range, replace: selection)
         cancelAndHide()
+    }
+}
+
+public class DefaultAutoCompleteCell: UITableViewCell, AutoCompletionItemCell {
+
+    public func updateView(item: AutoCompleteItem) {
+        textLabel?.text = "\(item.content)"
     }
 }

@@ -11,29 +11,8 @@ public protocol AutoCompletionDelegate: AnyObject {
     func didMatch(prefix: String, message: String)
 }
 
-/// AutoComplete configuration for each prefix.
-public struct AutoCompleteConfiguration {
-    /// If true then space will be added after the autocomplete text.
-    /// Default value is true.
-    public var addSpaceAfterInserting = true
-
-    /// If true then the selected autocomplete item will be
-    /// inserted with the prefix. Default value is true.
-    public var insertWithPrefix = true
-
-    /// If it is true, then the auto complete text won't be deleted in
-    /// a single back tap and the autocompleted text can be edited
-    /// by the user. Default value is false.
-    ///
-    /// NOTE: If this is true then adding text attributes
-    /// like font, color etc. won't work properly as the
-    /// content for this prefix will be treated as a normal text.
-    public var allowEditingAutocompleteText = false
-
-    /// Style for autocomplete text.
-    public var textStyle: Style?
-
-    public init() {}
+public protocol AutoCompletionItemCell: UITableViewCell {
+    func updateView(item: AutoCompleteItem)
 }
 
 /// An autocomplete manager that is used for registering prefixes,
@@ -61,7 +40,8 @@ public class AutoCompleteManager: NSObject {
 
     fileprivate var autoCompletionViewHeightConstraint: NSLayoutConstraint?
     private var autocompletionPrefixes: Set<String> = []
-    private var prefixConfigurations: [String: AutoCompleteConfiguration] = [:]
+    private var prefixConfigurations: [String: AutoCompleteItemConfiguration] = [:]
+    private var prefixCells: [String: AutoCompletionItemCell.Type] = [:]
 
     public init(
         textView: ALKChatBarTextView,
@@ -76,14 +56,20 @@ public class AutoCompleteManager: NSObject {
         autocompletionView.delegate = self
         autoCompletionViewHeightConstraint = autocompletionView.heightAnchor.constraint(equalToConstant: 0)
         autoCompletionViewHeightConstraint?.isActive = true
+        autocompletionView.register(DefaultAutoCompleteCell.self)
     }
 
-    public func registerPrefix(
+    public func registerPrefix<T: AutoCompletionItemCell>(
         prefix: String,
-        configuration: AutoCompleteConfiguration = AutoCompleteConfiguration()
+        configuration: AutoCompleteItemConfiguration = AutoCompleteItemConfiguration(),
+        cellType: T.Type
     ) {
         autocompletionPrefixes.insert(prefix)
         prefixConfigurations[prefix] = configuration
+        prefixCells[prefix] = cellType
+        if cellType != DefaultAutoCompleteCell.self {
+            autocompletionView.register(cellType)
+        }
     }
 
     public func reloadAutoCompletionView() {
@@ -110,7 +96,7 @@ public class AutoCompleteManager: NSObject {
     func insert(item: AutoCompleteItem, at insertionRange: NSRange, replace selection: Selection) {
         let defaultAttributes = textView.typingAttributes
         var newAttributes = defaultAttributes
-        let configuration = prefixConfigurations[selection.prefix] ?? AutoCompleteConfiguration()
+        let configuration = prefixConfigurations[selection.prefix] ?? AutoCompleteItemConfiguration()
         if let style = configuration.textStyle {
             // pass prefix attributes for the range and override old value if present
             newAttributes.merge(style.toAttributes) { $1 }
@@ -191,17 +177,9 @@ extension AutoCompleteManager: UITextViewDelegate {
         // Call delegate and get items
         autocompletionDelegate?.didMatch(prefix: result.prefix, message: String(result.word.dropFirst(result.prefix.count)))
     }
-}
 
-extension AutoCompleteConfiguration {
-    public static var memberMention: AutoCompleteConfiguration {
-        var config = AutoCompleteConfiguration()
-        config.textStyle = Style(
-            font: UIFont.systemFont(ofSize: 14),
-            text: UIColor.blue,
-            background: UIColor.blue.withAlphaComponent(0.1)
-        )
-        return config
+    func cellType(forPrefix prefix: String) -> AutoCompletionItemCell.Type {
+        return prefixCells[prefix] ?? DefaultAutoCompleteCell.self
     }
 }
 

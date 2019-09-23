@@ -862,12 +862,12 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
 
     private func setupAutoComplete() {
         autocompletionView.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
-        autocompletionView.register(MentionAutoCompleteCell.self)
         autocompleteManager.autocompletionDelegate = self
         if configuration.isMemberMentionEnabled {
             autocompleteManager.registerPrefix(
                 prefix: MessageMention.Prefix,
-                configuration: AutoCompleteConfiguration.memberMention
+                configuration: AutoCompleteItemConfiguration.memberMention,
+                cellType: MentionAutoCompleteCell.self
             )
         }
     }

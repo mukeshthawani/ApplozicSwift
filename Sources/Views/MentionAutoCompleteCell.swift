@@ -8,7 +8,7 @@
 import Kingfisher
 import UIKit
 
-class MentionAutoCompleteCell: UITableViewCell {
+class MentionAutoCompleteCell: UITableViewCell, AutoCompletionItemCell {
     struct Padding {
         struct Profile {
             static let left: CGFloat = 20
