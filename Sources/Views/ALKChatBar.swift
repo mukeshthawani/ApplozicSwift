@@ -725,12 +725,6 @@ extension ALKChatBar: UITextViewDelegate {
         textView.inputView = nil
         textView.reloadInputViews()
     }
-
-    func textStartsWithPrefix(_ text: String, prefix: String) -> Bool {
-        guard !prefix.isEmpty, text.starts(with: prefix) else { return false }
-        if text.count > 1, text[1] == " " { return false }
-        return true
-    }
 }
 
 extension ALKChatBar: ALKAudioRecorderProtocol {

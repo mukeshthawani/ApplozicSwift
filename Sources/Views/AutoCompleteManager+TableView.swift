@@ -13,7 +13,7 @@ extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
     }
 
     public func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        return filteredAutocompletionItems.count
+        return items.count
     }
 
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -23,21 +23,17 @@ extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
             cell = UITableViewCell(style: .subtitle, reuseIdentifier: UITableViewCell.reuseIdentifier)
         }
 
-        guard indexPath.row < filteredAutocompletionItems.count,
+        guard indexPath.row < items.count,
             let selection = selection else {
             return cell
         }
-        let item = filteredAutocompletionItems[indexPath.row]
+        let item = items[indexPath.row]
 
         let prefix = selection.prefix
-        if prefix == "@" {
+        if prefix == MessageMention.Prefix {
             let cell: MentionAutoCompleteCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
             cell.updateView(item: item)
             return cell
-        } else if prefix == "/" {
-            cell.detailTextLabel?.setTextColor(.gray)
-            cell.textLabel?.text = "/\(item.key)"
-            cell.detailTextLabel?.text = "\(item.content)"
         } else {
             cell.textLabel?.text = "\(item.content)"
         }
@@ -45,11 +41,8 @@ extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
     }
 
     public func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard indexPath.row < filteredAutocompletionItems.count else {
-            return
-        }
-        let item = filteredAutocompletionItems[indexPath.row]
-
+        guard indexPath.row < items.count else { return }
+        let item = items[indexPath.row]
         guard let selection = selection else { return }
 
         insert(item: item, at: selection.range, replace: selection)

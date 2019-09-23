@@ -867,10 +867,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
         if configuration.isMemberMentionEnabled {
             autocompleteManager.registerPrefix(
                 prefix: MessageMention.Prefix,
-                attributes: [
-                    .foregroundColor: UIColor.blue,
-                    .backgroundColor: UIColor.blue.withAlphaComponent(0.1),
-                ]
+                configuration: AutoCompleteConfiguration.memberMention
             )
         }
     }

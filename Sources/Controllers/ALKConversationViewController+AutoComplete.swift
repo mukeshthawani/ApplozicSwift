@@ -14,9 +14,9 @@ extension ALKConversationViewController: AutoCompletionDelegate {
         let items = viewModel.fetchGroupMembersForAutocompletion()
         // update auto completion items based on the prefix
         if message.isEmpty {
-            autocompleteManager.filteredAutocompletionItems = items
+            autocompleteManager.items = items
         } else {
-            autocompleteManager.filteredAutocompletionItems = items.filter { $0.content.lowercased().contains(message) }
+            autocompleteManager.items = items.filter { $0.content.lowercased().contains(message) }
         }
 
         // Reload and show the view

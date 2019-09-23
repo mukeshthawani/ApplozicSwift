@@ -11,8 +11,15 @@ public protocol AutoCompletionDelegate: AnyObject {
     func didMatch(prefix: String, message: String)
 }
 
+/// AutoComplete configuration for each prefix.
 public struct AutoCompleteConfiguration {
+
+    /// If true then space will be added after the autocomplete text.
+    /// Default value is true.
     public var addSpaceAfterInserting = true
+
+    /// If true then the selected autocomplete item will be
+    /// inserted with the prefix. Default value is true.
     public var insertWithPrefix = true
 
     /// If it is true, then the auto complete text won't be deleted in
@@ -23,22 +30,22 @@ public struct AutoCompleteConfiguration {
     /// like font, color etc. won't work properly as the
     /// content for this prefix will be treated as a normal text.
     public var allowEditingAutocompleteText = false
+
+    /// Style for autocomplete text.
+    public var textStyle: Style?
+
+    public init() {}
 }
 
+/// An autocomplete manager that is used for registering prefixes,
+/// finding prefixes in user text and showing autocomplete suggestions.
 public class AutoCompleteManager: NSObject {
     public let autocompletionView: UITableView
     public let textView: ALKChatBarTextView
     public weak var autocompletionDelegate: AutoCompletionDelegate?
+    public var items = [AutoCompleteItem]()
 
-    public var autoCompletionItems = [AutoCompleteItem]()
-    var filteredAutocompletionItems = [AutoCompleteItem]()
-
-    fileprivate var autoCompletionViewHeightConstraint: NSLayoutConstraint?
-    private var autocompletionPrefixes: Set<String> = []
-    private var autocompletionPrefixAttributes: [String: [NSAttributedString.Key: Any]] = [:]
-    private var prefixConfigurations: [String: AutoCompleteConfiguration] = [:]
-
-    // Prefix and selected item pair
+    // Prefix and entered word with its range in the text.
     typealias Selection = (
         prefix: String,
         range: NSRange,
@@ -48,13 +55,16 @@ public class AutoCompleteManager: NSObject {
     var selection: Selection? {
         didSet {
             if selection == nil {
-                autoCompletionItems = []
-                filteredAutocompletionItems = []
+                items = []
             }
         }
     }
 
-    init(
+    fileprivate var autoCompletionViewHeightConstraint: NSLayoutConstraint?
+    private var autocompletionPrefixes: Set<String> = []
+    private var prefixConfigurations: [String: AutoCompleteConfiguration] = [:]
+
+    public init(
         textView: ALKChatBarTextView,
         tableview: UITableView
     ) {
@@ -69,30 +79,43 @@ public class AutoCompleteManager: NSObject {
         autoCompletionViewHeightConstraint?.isActive = true
     }
 
-    func registerPrefix(
+    public func registerPrefix(
         prefix: String,
-        attributes: [NSAttributedString.Key: Any],
         configuration: AutoCompleteConfiguration = AutoCompleteConfiguration()
     ) {
         autocompletionPrefixes.insert(prefix)
-        autocompletionPrefixAttributes[prefix] = attributes
         prefixConfigurations[prefix] = configuration
     }
 
-    func textStartsWithPrefix(_ text: String, prefix: String) -> Bool {
-        guard !prefix.isEmpty, text.starts(with: prefix) else { return false }
-        if text.count > 1, text[1] == " " { return false }
-        return true
+    public func reloadAutoCompletionView() {
+        autocompletionView.reloadData()
+    }
+
+    public func hide(_ flag: Bool) {
+        if flag {
+            autoCompletionViewHeightConstraint?.constant = 0
+        } else {
+            let contentHeight = autocompletionView.contentSize.height
+
+            let bottomPadding: CGFloat = contentHeight > 0 ? 25 : 0
+            let maxheight: CGFloat = 200
+            autoCompletionViewHeightConstraint?.constant = contentHeight < maxheight ? contentHeight + bottomPadding : maxheight
+        }
+    }
+
+    public func cancelAndHide() {
+        selection = nil
+        hide(true)
     }
 
     func insert(item: AutoCompleteItem, at insertionRange: NSRange, replace selection: Selection) {
         let defaultAttributes = textView.typingAttributes
         var newAttributes = defaultAttributes
-        if let prefixAttributes = autocompletionPrefixAttributes[selection.prefix] {
-            // pass prefix attributes for the range and override old value if present
-            newAttributes.merge(prefixAttributes) { $1 }
-        }
         let configuration = prefixConfigurations[selection.prefix] ?? AutoCompleteConfiguration()
+        if let style = configuration.textStyle {
+            // pass prefix attributes for the range and override old value if present
+            newAttributes.merge(style.toAttributes) { $1 }
+        }
         if !configuration.allowEditingAutocompleteText {
             newAttributes[AutoCompleteItem.attributesKey] = selection.prefix + item.key
         }
@@ -117,27 +140,6 @@ public class AutoCompleteManager: NSObject {
             newAttributedText.append(NSAttributedString(string: " ", attributes: defaultAttributes))
         }
         textView.attributedText = newAttributedText
-    }
-
-    func reloadAutoCompletionView() {
-        autocompletionView.reloadData()
-    }
-
-    func hide(_ flag: Bool) {
-        if flag {
-            autoCompletionViewHeightConstraint?.constant = 0
-        } else {
-            let contentHeight = autocompletionView.contentSize.height
-
-            let bottomPadding: CGFloat = contentHeight > 0 ? 25 : 0
-            let maxheight: CGFloat = 200
-            autoCompletionViewHeightConstraint?.constant = contentHeight < maxheight ? contentHeight + bottomPadding : maxheight
-        }
-    }
-
-    func cancelAndHide() {
-        selection = nil
-        hide(true)
     }
 }
 
@@ -189,5 +191,27 @@ extension AutoCompleteManager: UITextViewDelegate {
         selection = (result.prefix, result.range, String(result.word.dropFirst(result.prefix.count)))
         // Call delegate and get items
         autocompletionDelegate?.didMatch(prefix: result.prefix, message: String(result.word.dropFirst(result.prefix.count)))
+    }
+}
+
+extension AutoCompleteConfiguration {
+    public static var memberMention: AutoCompleteConfiguration {
+        var config = AutoCompleteConfiguration()
+        config.textStyle = Style(
+            font: UIFont.systemFont(ofSize: 14),
+            text: UIColor.blue,
+            background: UIColor.blue.withAlphaComponent(0.1)
+        )
+        return config
+    }
+}
+
+extension Style {
+    var toAttributes: [NSAttributedString.Key: Any] {
+        return [
+            .foregroundColor: text,
+            .backgroundColor: background,
+            .font: font
+        ]
     }
 }
