@@ -23,6 +23,6 @@ extension ALKConversationViewController: AutoCompletionDelegate {
         UIView.performWithoutAnimation {
             self.autocompleteManager.reloadAutoCompletionView()
         }
-        autocompleteManager.showAutoCompletionView()
+        autocompleteManager.hide(false)
     }
 }

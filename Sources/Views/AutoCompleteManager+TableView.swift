@@ -53,6 +53,6 @@ extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
         guard let selection = selection else { return }
 
         insert(item: item, at: selection.range, replace: selection)
-        hideAutoCompletionView()
+        cancelAndHide()
     }
 }

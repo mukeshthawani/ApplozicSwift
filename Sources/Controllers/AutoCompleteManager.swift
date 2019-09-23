@@ -44,7 +44,15 @@ public class AutoCompleteManager: NSObject {
         range: NSRange,
         word: String
     )
-    var selection: Selection?
+
+    var selection: Selection? {
+        didSet {
+            if selection == nil {
+                autoCompletionItems = []
+                filteredAutocompletionItems = []
+            }
+        }
+    }
 
     init(
         textView: ALKChatBarTextView,
@@ -69,22 +77,6 @@ public class AutoCompleteManager: NSObject {
         autocompletionPrefixes.insert(prefix)
         autocompletionPrefixAttributes[prefix] = attributes
         prefixConfigurations[prefix] = configuration
-    }
-
-    func reloadAutoCompletionView() {
-        autocompletionView.reloadData()
-    }
-
-    func showAutoCompletionView() {
-        let contentHeight = autocompletionView.contentSize.height
-
-        let bottomPadding: CGFloat = contentHeight > 0 ? 25 : 0
-        let maxheight: CGFloat = 200
-        autoCompletionViewHeightConstraint?.constant = contentHeight < maxheight ? contentHeight + bottomPadding : maxheight
-    }
-
-    func hideAutoCompletionView() {
-        autoCompletionViewHeightConstraint?.constant = 0
     }
 
     func textStartsWithPrefix(_ text: String, prefix: String) -> Bool {
@@ -125,6 +117,27 @@ public class AutoCompleteManager: NSObject {
             newAttributedText.append(NSAttributedString(string: " ", attributes: defaultAttributes))
         }
         textView.attributedText = newAttributedText
+    }
+
+    func reloadAutoCompletionView() {
+        autocompletionView.reloadData()
+    }
+
+    func hide(_ flag: Bool) {
+        if flag {
+            autoCompletionViewHeightConstraint?.constant = 0
+        } else {
+            let contentHeight = autocompletionView.contentSize.height
+
+            let bottomPadding: CGFloat = contentHeight > 0 ? 25 : 0
+            let maxheight: CGFloat = 200
+            autoCompletionViewHeightConstraint?.constant = contentHeight < maxheight ? contentHeight + bottomPadding : maxheight
+        }
+    }
+
+    func cancelAndHide() {
+        selection = nil
+        hide(true)
     }
 }
 
@@ -169,7 +182,7 @@ extension AutoCompleteManager: UITextViewDelegate {
 
     public func textViewDidChangeSelection(_ textView: UITextView) {
         guard let result = textView.find(prefixes: autocompletionPrefixes) else {
-            hideAutoCompletionView()
+            cancelAndHide()
             return
         }
 

@@ -709,7 +709,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                 weakSelf.viewModel.sendKeyboardDoneTyping()
 
                 weakSelf.chatBar.clear()
-                weakSelf.autocompleteManager.hideAutoCompletionView()
+                weakSelf.autocompleteManager.cancelAndHide()
 
                 if let profanityFilter = weakSelf.profanityFilter, profanityFilter.containsRestrictedWords(text: message.string) {
                     let profanityTitle = weakSelf.localizedString(
