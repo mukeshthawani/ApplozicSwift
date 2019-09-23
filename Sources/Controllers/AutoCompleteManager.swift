@@ -13,7 +13,6 @@ public protocol AutoCompletionDelegate: AnyObject {
 
 /// AutoComplete configuration for each prefix.
 public struct AutoCompleteConfiguration {
-
     /// If true then space will be added after the autocomplete text.
     /// Default value is true.
     public var addSpaceAfterInserting = true
@@ -211,7 +210,7 @@ extension Style {
         return [
             .foregroundColor: text,
             .backgroundColor: background,
-            .font: font
+            .font: font,
         ]
     }
 }

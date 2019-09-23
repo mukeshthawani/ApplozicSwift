@@ -8,7 +8,6 @@
 import Foundation
 
 extension ALKMessageCell: ALKCopyMenuItemProtocol, ALKReplyMenuItemProtocol, ALKReportMessageMenuItemProtocol {
-
     func menuCopy(_: Any) {
         UIPasteboard.general.string = viewModel?.message ?? ""
     }

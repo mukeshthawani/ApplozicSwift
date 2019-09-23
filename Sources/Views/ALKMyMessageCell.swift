@@ -283,7 +283,8 @@ open class ALKMyMessageCell: ALKMessageCell {
                 width: messageWidth,
                 font: ALKMessageStyle.sentMessage.font,
                 mentionStyle: ALKMessageStyle.sentMention,
-                displayNames: displayNames)
+                displayNames: displayNames
+            )
         let heightPadding = Padding.MessageView.top + Padding.MessageView.bottom + Padding.BubbleView.bottom + Padding.ReplyView.top
 
         let totalHeight = messageHeight + heightPadding

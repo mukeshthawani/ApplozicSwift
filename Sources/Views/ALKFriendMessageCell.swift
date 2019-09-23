@@ -333,7 +333,8 @@ open class ALKFriendMessageCell: ALKMessageCell {
                 width: messageWidth,
                 font: ALKMessageStyle.receivedMessage.font,
                 mentionStyle: ALKMessageStyle.receivedMention,
-                displayNames: displayNames)
+                displayNames: displayNames
+            )
         let heightPadding = Padding.NameLabel.top + Padding.NameLabel.height + Padding.ReplyView.top + Padding.MessageView.top + Padding.MessageView.bottom + Padding.BubbleView.bottom
 
         let totalHeight = max(messageHeight + heightPadding, minimumHeight)
