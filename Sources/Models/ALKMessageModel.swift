@@ -133,16 +133,16 @@ extension ALKMessageViewModel {
         defaultAttributes: [NSAttributedString.Key: Any],
         mentionAttributes: [NSAttributedString.Key: Any],
         displayNames: ((Set<String>) -> ([String: String]?))?
-        ) -> NSAttributedString? {
-
+    ) -> NSAttributedString? {
         guard containsMentions,
             let userIds = mentionedUserIds,
             let names = displayNames?(userIds),
             let attributedText = mentionParser?.messageWithMentions(
                 displayNamesOfUsers: names,
                 attributesForMention: mentionAttributes,
-                defaultAttributes: defaultAttributes) else {
-                    return nil
+                defaultAttributes: defaultAttributes
+            ) else {
+            return nil
         }
         return attributedText
     }

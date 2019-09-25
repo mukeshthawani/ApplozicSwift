@@ -31,8 +31,9 @@ extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
         let autoCompleteCellType = cellType(forPrefix: selection.prefix)
         guard let autoCompleteCell = tableView.dequeueReusableCell(
             withIdentifier: autoCompleteCellType.reuseIdentifier,
-            for: indexPath) as? AutoCompletionItemCell else {
-                return cell
+            for: indexPath
+        ) as? AutoCompletionItemCell else {
+            return cell
         }
         autoCompleteCell.updateView(item: items[indexPath.row])
         return autoCompleteCell
@@ -49,7 +50,6 @@ extension AutoCompleteManager: UITableViewDataSource, UITableViewDelegate {
 }
 
 public class DefaultAutoCompleteCell: UITableViewCell, AutoCompletionItemCell {
-
     public func updateView(item: AutoCompleteItem) {
         textLabel?.text = "\(item.content)"
     }

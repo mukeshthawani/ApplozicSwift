@@ -433,13 +433,14 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel> {
 
     private func setReplyMessageText(
         viewModel: ALKMessageViewModel,
-        mentionStyle: Style) {
+        mentionStyle: Style
+    ) {
         if viewModel.messageType == .text,
             let attributedText = viewModel
-                .attributedTextWithMentions(
-                    defaultAttributes: [:],
-                    mentionAttributes: mentionStyle.toAttributes,
-                    displayNames: displayNames
+            .attributedTextWithMentions(
+                defaultAttributes: [:],
+                mentionAttributes: mentionStyle.toAttributes,
+                displayNames: displayNames
             ) {
             replyMessageLabel.attributedText = attributedText
         } else {
@@ -450,7 +451,8 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel> {
 
     private func setMessageText(
         viewModel: ALKMessageViewModel,
-        mentionStyle: Style) {
+        mentionStyle: Style
+    ) {
         if let attributedText = viewModel
             .attributedTextWithMentions(
                 defaultAttributes: messageView.typingAttributes,
