@@ -129,16 +129,22 @@ extension ALKMessageViewModel {
         return mentionParser
     }
 
-    func attributedMessageWithMentions(
-        displayNames: [String: String],
-        attributesForMention: [NSAttributedString.Key: Any],
-        defaultAttributes: [NSAttributedString.Key: Any]
-    ) -> NSAttributedString? {
-        return mentionParser?.messageWithMentions(
-            displayNamesOfUsers: displayNames,
-            attributesForMention: attributesForMention,
-            defaultAttributes: defaultAttributes
-        )
+    func attributedTextWithMentions(
+        defaultAttributes: [NSAttributedString.Key: Any],
+        mentionAttributes: [NSAttributedString.Key: Any],
+        displayNames: ((Set<String>) -> ([String: String]?))?
+        ) -> NSAttributedString? {
+
+        guard containsMentions,
+            let userIds = mentionedUserIds,
+            let names = displayNames?(userIds),
+            let attributedText = mentionParser?.messageWithMentions(
+                displayNamesOfUsers: names,
+                attributesForMention: mentionAttributes,
+                defaultAttributes: defaultAttributes) else {
+                    return nil
+        }
+        return attributedText
     }
 
     func payloadFromMetadata() -> [[String: Any]]? {

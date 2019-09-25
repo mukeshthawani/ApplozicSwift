@@ -112,10 +112,12 @@ open class ALKReplyMessageView: UIView, Localizable {
         nameLabel.text = message.isMyMessage ?
             selfNameText : message.displayName
         messageLabel.text = getMessageText()
-        if let attributedText = attributedTextWithMentions(
-            message,
-            displayNames: displayNames
-        ) {
+        if let attributedText = message
+            .attributedTextWithMentions(
+                defaultAttributes: Theme.message.toAttributes,
+                mentionAttributes: Theme.mention.toAttributes,
+                displayNames: displayNames
+            ) {
             messageLabel.attributedText = attributedText
         }
 
@@ -301,33 +303,5 @@ open class ALKReplyMessageView: UIView, Localizable {
             print("*** Error generating thumbnail: \(error.localizedDescription)")
             return nil
         }
-    }
-
-    private func attributedTextWithMentions(
-        _ viewModel: ALKMessageViewModel,
-        displayNames: ((Set<String>) -> ([String: String]?))?
-    ) -> NSAttributedString? {
-        let defaultAttributes: [NSAttributedString.Key: Any] = [
-            .font: Theme.message.font,
-            .foregroundColor: Theme.message.text,
-            .backgroundColor: Theme.message.background,
-        ]
-        let mentionAttributes: [NSAttributedString.Key: Any] = [
-            .font: Theme.mention.font,
-            .foregroundColor: Theme.mention.text,
-            .backgroundColor: Theme.mention.background,
-        ]
-        if viewModel.containsMentions,
-            let userIds = viewModel.mentionedUserIds,
-            let names = displayNames?(userIds),
-            let attributedText = viewModel
-            .attributedMessageWithMentions(
-                displayNames: names,
-                attributesForMention: mentionAttributes,
-                defaultAttributes: defaultAttributes
-            ) {
-            return attributedText
-        }
-        return nil
     }
 }
