@@ -152,17 +152,7 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel> {
             else { return }
             replyNameLabel.text = actualMessage.isMyMessage ?
                 selfNameText : actualMessage.displayName
-            replyMessageLabel.text =
-                getMessageTextFrom(viewModel: actualMessage)
-            if viewModel.messageType == .text,
-                let attributedText = actualMessage
-                    .attributedTextWithMentions(
-                        defaultAttributes: [:],
-                        mentionAttributes: mentionStyle.toAttributes,
-                        displayNames: displayNames
-                ) {
-                replyMessageLabel.attributedText = attributedText
-            }
+            setReplyMessageText(viewModel: actualMessage, mentionStyle: mentionStyle)
 
             if let imageURL = getURLForPreviewImage(message: actualMessage) {
                 setImageFrom(url: imageURL, to: previewImageView)
@@ -184,15 +174,7 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel> {
         case .text:
             emailTopHeight.constant = 0
             emailBottomViewHeight.constant = 0
-            messageView.text = message
-            if let attributedText = viewModel
-                .attributedTextWithMentions(
-                    defaultAttributes: messageView.typingAttributes,
-                    mentionAttributes: mentionStyle.toAttributes,
-                    displayNames: displayNames
-                ) {
-                messageView.attributedText = attributedText
-            }
+            setMessageText(viewModel: viewModel, mentionStyle: mentionStyle)
             return
         case .html:
             emailTopHeight.constant = 0
@@ -447,5 +429,37 @@ open class ALKMessageCell: ALKChatBaseCell<ALKMessageViewModel> {
         messageView.text = nil
         messageView.typingAttributes = [:]
         messageView.setStyle(style)
+    }
+
+    private func setReplyMessageText(
+        viewModel: ALKMessageViewModel,
+        mentionStyle: Style) {
+        if viewModel.messageType == .text,
+            let attributedText = viewModel
+                .attributedTextWithMentions(
+                    defaultAttributes: [:],
+                    mentionAttributes: mentionStyle.toAttributes,
+                    displayNames: displayNames
+            ) {
+            replyMessageLabel.attributedText = attributedText
+        } else {
+            replyMessageLabel.text =
+                getMessageTextFrom(viewModel: viewModel)
+        }
+    }
+
+    private func setMessageText(
+        viewModel: ALKMessageViewModel,
+        mentionStyle: Style) {
+        if let attributedText = viewModel
+            .attributedTextWithMentions(
+                defaultAttributes: messageView.typingAttributes,
+                mentionAttributes: mentionStyle.toAttributes,
+                displayNames: displayNames
+            ) {
+            messageView.attributedText = attributedText
+        } else {
+            messageView.text = viewModel.message
+        }
     }
 }

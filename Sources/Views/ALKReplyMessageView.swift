@@ -111,14 +111,16 @@ open class ALKReplyMessageView: UIView, Localizable {
         self.message = message
         nameLabel.text = message.isMyMessage ?
             selfNameText : message.displayName
-        messageLabel.text = getMessageText()
-        if let attributedText = message
+        if message.messageType == .text,
+            let attributedText = message
             .attributedTextWithMentions(
                 defaultAttributes: Theme.message.toAttributes,
                 mentionAttributes: Theme.mention.toAttributes,
                 displayNames: displayNames
             ) {
             messageLabel.attributedText = attributedText
+        } else {
+            messageLabel.text = getMessageText()
         }
 
         if let imageURL = getURLForPreviewImage(message: message) {
