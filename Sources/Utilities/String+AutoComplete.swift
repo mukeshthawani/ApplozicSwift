@@ -21,13 +21,18 @@ extension String {
         return (leftView[leftIndex...], rightView[..<rightIndex])
     }
 
+    // Returns a word and its range by looking at left and right
+    // of the given range.
+    //
+    // Starts from the left whitespace(or startIndex) and ends the search
+    // at right whitespace(or endIndex).
     func word(at nsrange: NSRange) -> (word: String, range: Range<String.Index>)? {
         guard !isEmpty,
             let range = Range(nsrange, in: self),
             let parts = self.wordParts(range)
         else { return nil }
 
-        // if the left-next character is whitespace, the "right word part" is the full word
+        // If the left-next character is whitespace, the "right word part" is the full word
         // short circuit with the right word part + its range
         if let characterBeforeRange = index(range.lowerBound, offsetBy: -1, limitedBy: startIndex),
             let character = self[characterBeforeRange].unicodeScalars.first,
