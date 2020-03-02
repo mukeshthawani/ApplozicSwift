@@ -148,13 +148,13 @@ extension ALKChatBaseCell where T == ALKMessageViewModel {
         guard let viewModel = viewModel,
             let statusIcon = style.statusIcons[viewModel.status] else { return }
         switch statusIcon {
-        case .templateImageWithTint(let image, let tintColor):
+        case let .templateImageWithTint(image, tintColor):
             statusView.image = image
                 .imageFlippedForRightToLeftLayoutDirection()
                 .scale(with: size)?
                 .withRenderingMode(.alwaysTemplate)
             statusView.tintColor = tintColor
-        case .normalImage(let image):
+        case let .normalImage(image):
             statusView.image = image
                 .imageFlippedForRightToLeftLayoutDirection()
                 .scale(with: size)?

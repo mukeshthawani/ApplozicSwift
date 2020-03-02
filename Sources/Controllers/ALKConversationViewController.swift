@@ -315,7 +315,6 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                 channel.name != nil else {
                 return
             }
-            // FIXME: We should check if it for the current thread.
             let profile = weakSelf.viewModel.conversationProfileFrom(contact: nil, channel: channel)
             weakSelf.navigationBar.updateView(profile: profile)
             weakSelf.newMessagesAdded()

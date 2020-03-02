@@ -28,7 +28,7 @@ extension ALKMessageStyle {
                             named: "read_state_2",
                             in: Bundle.applozic,
                             compatibleWith: nil
-                            ) ?? UIImage(),
+                        ) ?? UIImage(),
                         tintColor: UIColor(netHex: 0x0578FF)
                     )
                 case .delivered:
@@ -37,7 +37,7 @@ extension ALKMessageStyle {
                             named: "read_state_2",
                             in: Bundle.applozic,
                             compatibleWith: nil
-                            ) ?? UIImage()
+                        ) ?? UIImage()
                     )
                 case .sent:
                     icons[.sent] = .normalImage(
@@ -45,7 +45,7 @@ extension ALKMessageStyle {
                             named: "read_state_1",
                             in: Bundle.applozic,
                             compatibleWith: nil
-                            ) ?? UIImage()
+                        ) ?? UIImage()
                     )
                 case .pending:
                     icons[.pending] = .templateImageWithTint(
@@ -53,7 +53,7 @@ extension ALKMessageStyle {
                             named: "seen_state_0",
                             in: Bundle.applozic,
                             compatibleWith: nil
-                            ) ?? UIImage(),
+                        ) ?? UIImage(),
                         tintColor: .red
                     )
                 }

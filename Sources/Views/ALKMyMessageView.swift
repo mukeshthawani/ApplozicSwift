@@ -129,13 +129,13 @@ class ALKMyMessageView: UIView {
     ) {
         guard let statusIcon = style.statusIcons[status] else { return }
         switch statusIcon {
-        case .templateImageWithTint(let image, let tintColor):
+        case let .templateImageWithTint(image, tintColor):
             stateView.image = image
                 .imageFlippedForRightToLeftLayoutDirection()
                 .scale(with: size)?
                 .withRenderingMode(.alwaysTemplate)
             stateView.tintColor = tintColor
-        case .normalImage(let image):
+        case let .normalImage(image):
             stateView.image = image
                 .imageFlippedForRightToLeftLayoutDirection()
                 .scale(with: size)?
