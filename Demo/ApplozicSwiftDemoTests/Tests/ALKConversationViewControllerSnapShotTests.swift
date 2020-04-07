@@ -161,6 +161,47 @@ class ALKConversationViewControllerSnapshotTests: QuickSpec {
                 expect(navigationController.navigationBar).to(haveValidSnapshot())
             }
         }
+
+        describe("Email message") {
+            var conversationVC: ALKConversationViewController!
+
+            func prepareController(isSenderSide: Bool) {
+                let contactId = "testExample"
+                conversationVC = ALKConversationViewController(configuration: ALKConfiguration())
+                let convVM = ALKConversationViewModelMock(contactId: contactId, channelKey: nil, localizedStringFileName: ALKConfiguration().localizedStringFileName)
+
+                let emailMessage = MockMessage().message
+                emailMessage.contentType = Int16(ALMESSAGE_CONTENT_TEXT_HTML)
+                emailMessage.source = 7
+                emailMessage.type = isSenderSide ? "5" : "6"
+                let textMessage = MockMessage().message
+                textMessage.message = "second message"
+                textMessage.type = isSenderSide ? "5" : "6"
+                ALKConversationViewModelMock.testMessages = [emailMessage.messageModel, textMessage.messageModel]
+                conversationVC.viewModel = convVM
+            }
+
+            context("when it was received") {
+                beforeEach {
+                    prepareController(isSenderSide: false)
+                    conversationVC.beginAppearanceTransition(true, animated: false)
+                    conversationVC.endAppearanceTransition()
+                }
+                it("renders on the left side") {
+                    expect(conversationVC.view).toEventually(haveValidSnapshot())
+                }
+            }
+            context("when it was sent") {
+                beforeEach {
+                    prepareController(isSenderSide: true)
+                    conversationVC.beginAppearanceTransition(true, animated: false)
+                    conversationVC.endAppearanceTransition()
+                }
+                it("renders on the right side") {
+                    expect(conversationVC.view).toEventually(haveValidSnapshot())
+                }
+            }
+        }
     }
 
     func applyColor(navigationController: UINavigationController) {
