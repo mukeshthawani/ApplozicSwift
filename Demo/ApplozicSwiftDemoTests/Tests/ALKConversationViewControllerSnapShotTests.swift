@@ -177,6 +177,7 @@ class ALKConversationViewControllerSnapshotTests: QuickSpec {
                 let textMessage = MockMessage().message
                 textMessage.message = "second message"
                 textMessage.type = isSenderSide ? "5" : "6"
+                ALKMessageStyle.messageStatus = ALKMessageStyle.SentMessageStatus()
                 ALKConversationViewModelMock.testMessages = [emailMessage.messageModel, textMessage.messageModel]
                 conversationVC.viewModel = convVM
             }
@@ -188,7 +189,7 @@ class ALKConversationViewControllerSnapshotTests: QuickSpec {
                     conversationVC.endAppearanceTransition()
                 }
                 it("renders on the left side") {
-                    expect(conversationVC.view).toEventually(haveValidSnapshot())
+                    expect(conversationVC.view).toEventually(haveValidSnapshot(), timeout: 2.0)
                 }
             }
             context("when it was sent") {
@@ -198,7 +199,7 @@ class ALKConversationViewControllerSnapshotTests: QuickSpec {
                     conversationVC.endAppearanceTransition()
                 }
                 it("renders on the right side") {
-                    expect(conversationVC.view).toEventually(haveValidSnapshot())
+                    expect(conversationVC.view).toEventually(haveValidSnapshot(), timeout: 2.0)
                 }
             }
         }
