@@ -486,11 +486,34 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 }
                 return cell
             }
+        case .form:
+            guard let template = message.formTemplate() else { return UITableViewCell() }
+            let cell: ALKFormCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+            cell.template = template
+            return cell
         }
     }
 
     public func tableView(_: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return viewModel.heightForRow(indexPath: indexPath, cellFrame: view.frame, configuration: configuration)
+        // TODO: temp
+        if let message = viewModel.messageForRow(indexPath: indexPath),
+            message.messageType == .form,
+            message.formTemplate() != nil {
+            return UITableView.automaticDimension
+        } else {
+            return viewModel.heightForRow(indexPath: indexPath, cellFrame: view.frame, configuration: configuration)
+        }
+    }
+
+    public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        // TODO: temp
+        if let message = viewModel.messageForRow(indexPath: indexPath),
+            message.messageType == .form,
+            message.formTemplate() != nil {
+            return UITableView.automaticDimension
+        } else {
+            return 40
+        }
     }
 
     public func tableView(_: UITableView, heightForHeaderInSection section: Int) -> CGFloat {

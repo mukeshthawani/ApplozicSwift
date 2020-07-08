@@ -658,6 +658,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
 
         tableView.register(ALKMyLinkPreviewCell.self)
         tableView.register(ALKFriendLinkPreviewCell.self)
+        tableView.register(ALKFormCell.self)
     }
 
     private func prepareMoreBar() {
