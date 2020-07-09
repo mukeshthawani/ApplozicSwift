@@ -487,9 +487,9 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
                 return cell
             }
         case .form:
-            guard let template = message.formTemplate() else { return UITableViewCell() }
-            let cell: ALKFormCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
-            cell.template = template
+            guard message.formTemplate() != nil else { return UITableViewCell() }
+            let cell: ALKFriendFormCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+            cell.update(viewModel: message)
             return cell
         }
     }

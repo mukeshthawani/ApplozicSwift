@@ -7,46 +7,37 @@
 
 import UIKit
 
-class ALKFormCell: UITableViewCell {
+class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel> {
     typealias Section = [UITableViewCell]
 
-    var template: FormTemplate? {
+    private var template: FormTemplate? {
         didSet {
             buildSections()
-            tableView.reloadData()
+            itemListView.reloadData()
         }
     }
+    let itemListView = NestedCellTableView()
     private var sections: [Section] = []
 
-    private let tableView = NestedCellTableView()
-
-    // TODO: Add message view and handle auto height
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    override func setupViews() {
+        super.setupViews()
         setUpTableView()
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    override func update(viewModel: ALKMessageViewModel) {
+        super.update(viewModel: viewModel)
+        template = viewModel.formTemplate()
     }
 
     private func setUpTableView() {
-        tableView.backgroundColor = .white
-        tableView.estimatedRowHeight = 50
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.separatorStyle = .none
-        tableView.allowsSelection = false
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(ALKFormTextItemCell.self)
-
-        addViewsForAutolayout(views: [tableView])
-        tableView.layout {
-            $0.top == topAnchor
-            $0.bottom == bottomAnchor
-            $0.leading == leadingAnchor + 20
-            $0.trailing == trailingAnchor - 20
-        }
+        itemListView.backgroundColor = .white
+        itemListView.estimatedRowHeight = 50
+        itemListView.rowHeight = UITableView.automaticDimension
+        itemListView.separatorStyle = .none
+        itemListView.allowsSelection = false
+        itemListView.delegate = self
+        itemListView.dataSource = self
+        itemListView.register(ALKFormTextItemCell.self)
     }
 
     private func buildSections() {
