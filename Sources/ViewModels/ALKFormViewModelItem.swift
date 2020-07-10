@@ -14,12 +14,16 @@ enum FormViewModelItemType {
 
 protocol FormViewModelItem {
     var type: FormViewModelItemType { get }
+    var sectionTitle: String { get }
     var rowCount: Int { get }
 }
 
 extension FormViewModelItem {
     var rowCount: Int {
         return 1
+    }
+    var sectionTitle: String {
+        return ""
     }
 }
 
@@ -30,7 +34,9 @@ class FormViewModelMultiselectItem: FormViewModelItem {
     }
     var title: String
     var options: [Option]
-
+    var sectionTitle: String {
+        return title
+    }
     var rowCount: Int {
         return options.count
     }

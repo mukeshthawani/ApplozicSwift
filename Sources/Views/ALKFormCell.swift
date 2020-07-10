@@ -31,11 +31,13 @@ class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel> {
     private func setUpTableView() {
         itemListView.backgroundColor = .white
         itemListView.estimatedRowHeight = 50
+        itemListView.estimatedSectionHeaderHeight = 50
         itemListView.rowHeight = UITableView.automaticDimension
-        itemListView.separatorStyle = .none
+        itemListView.separatorStyle = .singleLine
         itemListView.allowsSelection = false
         itemListView.delegate = self
         itemListView.dataSource = self
+        itemListView.register(ALKFormItemHeaderView.self)
         itemListView.register(ALKFormTextItemCell.self)
         itemListView.register(ALKFormMultiSelectItemCell.self)
     }
@@ -65,6 +67,20 @@ extension ALKFormCell: UITableViewDataSource, UITableViewDelegate {
             cell.item = multiselectItem.options[indexPath.row]
             return cell
         }
+    }
+
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let item = items[section]
+        guard !item.sectionTitle.isEmpty else { return nil }
+        let headerView: ALKFormItemHeaderView = tableView.dequeueReusableHeaderFooterView()
+        headerView.item = item
+        return headerView
+    }
+
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        let item = items[section]
+        guard !item.sectionTitle.isEmpty else { return 0 }
+        return UITableView.automaticDimension
     }
 }
 
