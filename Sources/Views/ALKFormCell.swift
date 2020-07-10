@@ -8,16 +8,15 @@
 import UIKit
 
 class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel> {
-    typealias Section = [UITableViewCell]
+    let itemListView = NestedCellTableView()
 
+    private var items: [FormViewModelItem] = []
     private var template: FormTemplate? {
         didSet {
-            buildSections()
+            items = template?.viewModeItems ?? []
             itemListView.reloadData()
         }
     }
-    let itemListView = NestedCellTableView()
-    private var sections: [Section] = []
 
     override func setupViews() {
         super.setupViews()
@@ -38,50 +37,34 @@ class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel> {
         itemListView.delegate = self
         itemListView.dataSource = self
         itemListView.register(ALKFormTextItemCell.self)
-    }
-
-    private func buildSections() {
-        guard let template = template else { return }
-        sections = []
-        for item in template.viewModeItems {
-            switch item.type {
-            case .text:
-                let formViewCell = ALKFormTextItemCell()
-                formViewCell.item = item
-                sections.append([formViewCell])
-            default:
-                // TODO: temp
-                print("Not supported")
-            }
-        }
-    }
-
-    private func cell(for indexPath: IndexPath) -> UITableViewCell {
-        return sections[indexPath.section][indexPath.row]
+        itemListView.register(ALKFormMultiSelectItemCell.self)
     }
 }
 
 extension ALKFormCell: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return sections.count
+        return items.count
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return sections[section].count
+        return items[section].rowCount
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return cell(for: indexPath)
-    }
-
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        let lineView = UIView(frame: CGRect(x: 0, y:0, width: tableView.frame.width, height: 0.5))
-        lineView.backgroundColor = .lightGray
-        return lineView
-    }
-
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 0.5
+        let item = items[indexPath.section]
+        switch item.type {
+        case .text:
+            let cell: ALKFormTextItemCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+            cell.item = item
+            return cell
+        case .multiselect:
+            guard let multiselectItem = item as? FormViewModelMultiselectItem else {
+                return UITableViewCell()
+            }
+            let cell: ALKFormMultiSelectItemCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+            cell.item = multiselectItem.options[indexPath.row]
+            return cell
+        }
     }
 }
 
@@ -92,9 +75,8 @@ class NestedCellTableView: UITableView {
     }
 
     override var contentSize: CGSize {
-        didSet{
+        didSet {
             self.invalidateIntrinsicContentSize()
         }
     }
 }
-

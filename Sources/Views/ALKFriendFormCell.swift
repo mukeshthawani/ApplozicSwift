@@ -130,7 +130,6 @@ class ALKFriendFormCell: ALKFormCell {
         let rightPadding = ChatCellPadding.ReceivedMessage.Message.right
         let widthPadding = CGFloat(ALKMessageStyle.receivedBubble.widthPadding)
         let templateLeftPadding = leftPadding + 64 - widthPadding
-        let templateRightPadding = rightPadding - widthPadding
         messageViewHeight.isActive = true
         messageView.layout {
             $0.top == nameLabel.bottomAnchor
@@ -141,7 +140,7 @@ class ALKFriendFormCell: ALKFormCell {
             $0.top == messageView.bottomAnchor + ChatCellPadding.ReceivedMessage.MessageButton.top
             $0.bottom == timeLabel.topAnchor - ChatCellPadding.ReceivedMessage.MessageButton.bottom
             $0.leading == messageView.leadingAnchor + templateLeftPadding
-            $0.trailing == trailingAnchor - templateRightPadding
+            $0.trailing == trailingAnchor - ChatCellPadding.ReceivedMessage.MessageButton.right
         }
     }
 

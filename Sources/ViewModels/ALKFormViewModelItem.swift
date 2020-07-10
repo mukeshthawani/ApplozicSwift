@@ -9,7 +9,7 @@ import Foundation
 
 enum FormViewModelItemType {
     case text
-    case checkbox
+    case multiselect
 }
 
 protocol FormViewModelItem {
@@ -23,17 +23,18 @@ extension FormViewModelItem {
     }
 }
 
-class FormViewModelCheckboxItem: FormViewModelItem {
+class FormViewModelMultiselectItem: FormViewModelItem {
+    typealias Option = FormTemplate.Element.Option
     var type: FormViewModelItemType {
-        return .checkbox
+        return .multiselect
     }
     var title: String
-    var options: [String]
+    var options: [Option]
 
     var rowCount: Int {
         return options.count
     }
-    init(title: String, options: [String]) {
+    init(title: String, options: [Option]) {
         self.title = title
         self.options = options
     }
@@ -61,8 +62,15 @@ extension FormTemplate {
                 guard let name = element.label else { return }
                 items.append(FormViewModelTextItem(
                     name: name,
-                    placeholder: element.placeholder)
-                )
+                    placeholder: element.placeholder
+                ))
+            case .singleSelect:
+                // TODO: Temp
+                guard let title = element.title, let options = element.options else { return }
+                items.append(FormViewModelMultiselectItem(
+                    title: title,
+                    options: options
+                ))
             case .unknown:
                 print("Form template: unknown type")
             default:
