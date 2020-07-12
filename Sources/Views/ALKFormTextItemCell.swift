@@ -14,16 +14,22 @@ class ALKFormTextItemCell: UITableViewCell {
                 return
             }
             nameLabel.text = item.name
+            valueTextField.placeholder = item.placeholder
         }
     }
 
     let nameLabel: UILabel = {
         let label = UILabel(frame: .zero)
-        label.font = Font.normal(size: 17).font()
+        label.font = Font.medium(size: 15).font()
         label.textColor = .black
         label.numberOfLines = 1
-        label.textAlignment = .center
+        label.textAlignment = .left
         return label
+    }()
+
+    let valueTextField: UITextField = {
+        let textfield = UITextField(frame: .zero)
+        return textfield
     }()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -36,11 +42,16 @@ class ALKFormTextItemCell: UITableViewCell {
     }
 
     private func addConstraints() {
-        addViewsForAutolayout(views: [nameLabel])
+        addViewsForAutolayout(views: [nameLabel, valueTextField])
         nameLabel.layout {
             $0.leading == leadingAnchor + 10
             $0.trailing == trailingAnchor - 30
             $0.top == topAnchor + 10
+        }
+        valueTextField.layout {
+            $0.leading == nameLabel.leadingAnchor
+            $0.trailing == nameLabel.trailingAnchor
+            $0.top == nameLabel.bottomAnchor + 5
             $0.bottom <= bottomAnchor - 10
         }
     }
