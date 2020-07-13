@@ -66,11 +66,13 @@ class ALKFriendFormCell: ALKFormCell {
     }()
 
     fileprivate var messageView = ALKFriendMessageView()
+    fileprivate var submitButtonView = UIView(frame: .zero)
 
     fileprivate lazy var timeLabelWidth = timeLabel.widthAnchor.constraint(equalToConstant: 0)
     fileprivate lazy var timeLabelHeight = timeLabel.heightAnchor.constraint(equalToConstant: 0)
 
     lazy var messageViewHeight = self.messageView.heightAnchor.constraint(equalToConstant: 0)
+    lazy var submitButtonViewHeight = self.submitButtonView.heightAnchor.constraint(equalToConstant: 0)
 
     override func setupViews() {
         super.setupViews()
@@ -88,7 +90,10 @@ class ALKFriendFormCell: ALKFormCell {
         }
         messageView.updateHeightOfViews(hideView: isMessageEmpty, viewModel: viewModel, maxWidth: maxWidth)
         showNameAndAvatarImageView(isMessageEmpty: isMessageEmpty, viewModel: viewModel)
-
+        if let submitButton = submitButton, submitButtonView.subviews.isEmpty {
+            submitButtonViewHeight.constant = submitButton.buttonHeight()
+            submitButtonView.addSubview(submitButton)
+        }
         timeLabel.setStyle(ALKMessageStyle.time)
         timeLabel.text = viewModel.time
         let timeLabelSize = viewModel.time!.rectWithConstrainedWidth(
@@ -107,6 +112,7 @@ class ALKFriendFormCell: ALKFormCell {
             avatarImageView,
             messageView,
             itemListView,
+            submitButtonView,
             timeLabel
         ])
         nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: Padding.NameLabel.top).isActive = true
@@ -131,6 +137,7 @@ class ALKFriendFormCell: ALKFormCell {
         let widthPadding = CGFloat(ALKMessageStyle.receivedBubble.widthPadding)
         let templateLeftPadding = leftPadding + 64 - widthPadding
         messageViewHeight.isActive = true
+        submitButtonViewHeight.isActive = true
         messageView.layout {
             $0.top == nameLabel.bottomAnchor
             $0.leading == leadingAnchor + leftPadding
@@ -138,9 +145,14 @@ class ALKFriendFormCell: ALKFormCell {
         }
         itemListView.layout {
             $0.top == messageView.bottomAnchor + ChatCellPadding.ReceivedMessage.MessageButton.top
-            $0.bottom == timeLabel.topAnchor - ChatCellPadding.ReceivedMessage.MessageButton.bottom
+            $0.bottom == submitButtonView.topAnchor - ChatCellPadding.ReceivedMessage.MessageButton.bottom
             $0.leading == messageView.leadingAnchor + templateLeftPadding
             $0.trailing == trailingAnchor - ChatCellPadding.ReceivedMessage.MessageButton.right
+        }
+        submitButtonView.layout {
+            $0.bottom == timeLabel.topAnchor - ChatCellPadding.ReceivedMessage.MessageButton.bottom
+            $0.leading == itemListView.leadingAnchor
+            $0.trailing == itemListView.trailingAnchor
         }
     }
 

@@ -7,14 +7,23 @@
 
 import UIKit
 
-class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel> {
+class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel>, UITextFieldDelegate {
     let itemListView = NestedCellTableView()
+    var submitButton: CurvedImageButton?
+    var activeTextField: UITextField? {
+        didSet {
+            activeTextFieldChanged?(activeTextField)
+        }
+    }
+    var activeTextFieldChanged: ((UITextField?) -> Void)?
 
     private var items: [FormViewModelItem] = []
     private var template: FormTemplate? {
         didSet {
             items = template?.viewModeItems ?? []
             itemListView.reloadData()
+            guard let submitButtonTitle = template?.submitButtonTitle else { return }
+            setUpSubmitButton(title: submitButtonTitle)
         }
     }
 
@@ -26,6 +35,13 @@ class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel> {
     override func update(viewModel: ALKMessageViewModel) {
         super.update(viewModel: viewModel)
         template = viewModel.formTemplate()
+    }
+
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        activeTextField = textField
+    }
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        activeTextField = nil
     }
 
     private func setUpTableView() {
@@ -40,6 +56,13 @@ class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel> {
         itemListView.register(ALKFormItemHeaderView.self)
         itemListView.register(ALKFormTextItemCell.self)
         itemListView.register(ALKFormMultiSelectItemCell.self)
+    }
+
+    private func setUpSubmitButton(title: String) {
+        let button = CurvedImageButton(title: title)
+        button.delegate = self
+        button.index = 1111
+        submitButton = button
     }
 }
 
@@ -58,6 +81,7 @@ extension ALKFormCell: UITableViewDataSource, UITableViewDelegate {
         case .text:
             let cell: ALKFormTextItemCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
             cell.item = item
+            cell.valueTextField.delegate = self
             return cell
         case .multiselect:
             guard let multiselectItem = item as? FormViewModelMultiselectItem else {
@@ -81,6 +105,12 @@ extension ALKFormCell: UITableViewDataSource, UITableViewDelegate {
         let item = items[section]
         guard !item.sectionTitle.isEmpty else { return 0 }
         return UITableView.automaticDimension
+    }
+}
+
+extension ALKFormCell: Tappable {
+    func didTap(index: Int?, title: String) {
+        print("tapped submit button in the form")
     }
 }
 

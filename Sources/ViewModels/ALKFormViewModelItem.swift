@@ -70,6 +70,12 @@ extension FormTemplate {
                     name: name,
                     placeholder: element.placeholder
                 ))
+            case .password:
+                guard let name = element.label else { return }
+                items.append(FormViewModelTextItem(
+                    name: name,
+                    placeholder: element.placeholder
+                ))
             case .singleSelect:
                 // TODO: Temp
                 guard let title = element.title, let options = element.options else { return }
@@ -77,13 +83,21 @@ extension FormTemplate {
                     title: title,
                     options: options
                 ))
-            case .unknown:
-                print("Form template: unknown type")
+            case .multiselect:
+                guard let title = element.title, let options = element.options else { return }
+                items.append(FormViewModelMultiselectItem(
+                    title: title,
+                    options: options
+                ))
             default:
-                // TODO: Temp, remove this
-                items.append(FormViewModelTextItem(name: "Temp cell", placeholder: nil))
+                print("\(element.contentType) form template type is not part of the form list view")
             }
         }
         return items
+    }
+
+    var submitButtonTitle: String? {
+        guard let submitButton = elements.filter({ $0.contentType == .submit }).first else { return nil }
+        return submitButton.label
     }
 }

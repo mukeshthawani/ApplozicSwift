@@ -88,6 +88,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
 
     fileprivate var localizedStringFileName: String!
     fileprivate var profanityFilter: ProfanityFilter?
+    var activeTextField: UITextField?
 
     fileprivate enum ActionType: String {
         case link
@@ -191,6 +192,7 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
                     let weakSelf = self,
                     weakSelf.chatBar.isTextViewFirstResponder,
                     let keyboardSize = (keyboardFrameValue as? NSValue)?.cgRectValue else {
+                        self?.scrollTableViewUpForActiveField(notification: notification)
                     return
                 }
 
@@ -219,14 +221,13 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
             queue: nil,
             using: { [weak self] notification in
                 guard let weakSelf = self else { return }
+                weakSelf.scrollTableViewDownForActiveField()
+
                 let view = weakSelf.view
-
                 weakSelf.bottomConstraint?.constant = 0
-
                 let duration = (notification
                     .userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?
                     .doubleValue ?? 0.05
-
                 UIView.animate(withDuration: duration, animations: {
                     view?.layoutIfNeeded()
                 }, completion: { _ in
