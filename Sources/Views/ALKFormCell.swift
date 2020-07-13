@@ -56,6 +56,7 @@ class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel>, UITextFieldDelegate {
         itemListView.dataSource = self
         itemListView.register(ALKFormItemHeaderView.self)
         itemListView.register(ALKFormTextItemCell.self)
+        itemListView.register(ALKFormPasswordItemCell.self)
         itemListView.register(ALKFormSingleSelectItemCell.self)
         itemListView.register(ALKFormMultiSelectItemCell.self)
     }
@@ -82,6 +83,11 @@ extension ALKFormCell: UITableViewDataSource, UITableViewDelegate {
         switch item.type {
         case .text:
             let cell: ALKFormTextItemCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+            cell.item = item
+            cell.valueTextField.delegate = self
+            return cell
+        case .password:
+            let cell: ALKFormPasswordItemCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
             cell.item = item
             cell.valueTextField.delegate = self
             return cell

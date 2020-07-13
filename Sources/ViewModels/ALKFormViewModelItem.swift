@@ -9,6 +9,7 @@ import Foundation
 
 enum FormViewModelItemType {
     case text
+    case password
     case singleselect
     case multiselect
 }
@@ -79,6 +80,19 @@ class FormViewModelTextItem: FormViewModelItem {
     }
 }
 
+class FormViewModelPasswordItem: FormViewModelItem {
+    var type: FormViewModelItemType {
+        return .password
+    }
+    let name: String
+    let placeholder: String?
+
+    init(name: String, placeholder: String?) {
+        self.name = name
+        self.placeholder = placeholder
+    }
+}
+
 extension FormTemplate {
     var viewModeItems: [FormViewModelItem] {
         var items: [FormViewModelItem] = []
@@ -92,7 +106,7 @@ extension FormTemplate {
                 ))
             case .password:
                 guard let name = element.label else { return }
-                items.append(FormViewModelTextItem(
+                items.append(FormViewModelPasswordItem(
                     name: name,
                     placeholder: element.placeholder
                 ))
