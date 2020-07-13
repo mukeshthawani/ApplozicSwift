@@ -54,6 +54,7 @@ class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel>, UITextFieldDelegate {
         itemListView.allowsSelection = false
         itemListView.delegate = self
         itemListView.dataSource = self
+        itemListView.tableFooterView = UIView(frame: .zero)
         itemListView.register(ALKFormItemHeaderView.self)
         itemListView.register(ALKFormTextItemCell.self)
         itemListView.register(ALKFormPasswordItemCell.self)
