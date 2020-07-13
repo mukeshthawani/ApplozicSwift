@@ -519,7 +519,7 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
             message.formTemplate() != nil {
             return UITableView.automaticDimension
         } else {
-            return 40
+            return viewModel.heightForRow(indexPath: indexPath, cellFrame: view.frame, configuration: configuration)
         }
     }
 
