@@ -26,6 +26,7 @@ class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel>, UITextFieldDelegate {
             setUpSubmitButton(title: submitButtonTitle)
         }
     }
+    private var selectedIndexes: [Int: Int] = [:]
 
     override func setupViews() {
         super.setupViews()
@@ -55,6 +56,7 @@ class ALKFormCell: ALKChatBaseCell<ALKMessageViewModel>, UITextFieldDelegate {
         itemListView.dataSource = self
         itemListView.register(ALKFormItemHeaderView.self)
         itemListView.register(ALKFormTextItemCell.self)
+        itemListView.register(ALKFormSingleSelectItemCell.self)
         itemListView.register(ALKFormMultiSelectItemCell.self)
     }
 
@@ -82,6 +84,22 @@ extension ALKFormCell: UITableViewDataSource, UITableViewDelegate {
             let cell: ALKFormTextItemCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
             cell.item = item
             cell.valueTextField.delegate = self
+            return cell
+        case .singleselect:
+            guard let singleselectItem = item as? FormViewModelSingleselectItem else {
+                return UITableViewCell()
+            }
+            let cell: ALKFormSingleSelectItemCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+            cell.cellSelected = {
+                self.selectedIndexes[indexPath.section] = indexPath.row
+                tableView.reloadSections([indexPath.section], with: .none)
+            }
+            cell.item = singleselectItem.options[indexPath.row]
+            if let rowSelected = selectedIndexes[indexPath.section], rowSelected == indexPath.row {
+                cell.accessoryType = .checkmark
+            } else {
+                cell.accessoryType = .none
+            }
             return cell
         case .multiselect:
             guard let multiselectItem = item as? FormViewModelMultiselectItem else {

@@ -498,7 +498,6 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
     }
 
     public func tableView(_: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        // TODO: temp
         if let message = viewModel.messageForRow(indexPath: indexPath),
             message.messageType == .form,
             message.formTemplate() != nil {
@@ -509,7 +508,6 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
     }
 
     public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        // TODO: temp
         if let message = viewModel.messageForRow(indexPath: indexPath),
             message.messageType == .form,
             message.formTemplate() != nil {

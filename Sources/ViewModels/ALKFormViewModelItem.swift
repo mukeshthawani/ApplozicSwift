@@ -9,6 +9,7 @@ import Foundation
 
 enum FormViewModelItemType {
     case text
+    case singleselect
     case multiselect
 }
 
@@ -24,6 +25,25 @@ extension FormViewModelItem {
     }
     var sectionTitle: String {
         return ""
+    }
+}
+
+class FormViewModelSingleselectItem: FormViewModelItem {
+    typealias Option = FormTemplate.Element.Option
+    var type: FormViewModelItemType {
+        return .singleselect
+    }
+    var title: String
+    var options: [Option]
+    var sectionTitle: String {
+        return title
+    }
+    var rowCount: Int {
+        return options.count
+    }
+    init(title: String, options: [Option]) {
+        self.title = title
+        self.options = options
     }
 }
 
@@ -77,9 +97,8 @@ extension FormTemplate {
                     placeholder: element.placeholder
                 ))
             case .singleSelect:
-                // TODO: Temp
                 guard let title = element.title, let options = element.options else { return }
-                items.append(FormViewModelMultiselectItem(
+                items.append(FormViewModelSingleselectItem(
                     title: title,
                     options: options
                 ))
