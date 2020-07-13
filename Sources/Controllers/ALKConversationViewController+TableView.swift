@@ -488,12 +488,18 @@ extension ALKConversationViewController: UITableViewDelegate, UITableViewDataSou
             }
         case .form:
             guard message.formTemplate() != nil else { return UITableViewCell() }
-            let cell: ALKFriendFormCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
-            cell.activeTextFieldChanged = { textField in
-                self.activeTextField = textField
+            if message.isMyMessage {
+                let cell: ALKMyFormCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+                cell.update(viewModel: message)
+                return cell
+            } else {
+                let cell: ALKFriendFormCell = tableView.dequeueReusableCell(forIndexPath: indexPath)
+                cell.activeTextFieldChanged = { textField in
+                    self.activeTextField = textField
+                }
+                cell.update(viewModel: message)
+                return cell
             }
-            cell.update(viewModel: message)
-            return cell
         }
     }
 
