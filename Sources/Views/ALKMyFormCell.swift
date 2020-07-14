@@ -26,6 +26,7 @@ class ALKMyFormCell: ALKFormCell {
 
     fileprivate var timeLabel: UILabel = {
         let lb = UILabel()
+        lb.numberOfLines = 1
         lb.isOpaque = true
         return lb
     }()
@@ -83,7 +84,6 @@ class ALKMyFormCell: ALKFormCell {
         stateView.heightAnchor.constraint(equalToConstant: Padding.StateView.height).isActive = true
         stateView.widthAnchor.constraint(equalToConstant: Padding.StateView.width).isActive = true
         timeLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Padding.TimeLabel.bottom).isActive = true
-        timeLabel.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: Padding.TimeLabel.left).isActive = true
         timeLabelWidth.isActive = true
         timeLabelHeight.isActive = true
         timeLabel.trailingAnchor.constraint(equalTo: stateView.leadingAnchor, constant: -Padding.TimeLabel.right).isActive = true
@@ -91,7 +91,8 @@ class ALKMyFormCell: ALKFormCell {
         let leftPadding = ChatCellPadding.SentMessage.Message.left
         let rightPadding = ChatCellPadding.SentMessage.Message.right
         let widthPadding = CGFloat(ALKMessageStyle.sentBubble.widthPadding)
-        let templateLeftPadding = leftPadding + 64 - widthPadding
+        let templateLeftPadding = ChatCellPadding.SentMessage.MessageButton.left
+        let templateRightPadding = rightPadding - widthPadding
         messageViewHeight.isActive = true
         messageView.layout {
             $0.top == topAnchor
@@ -101,8 +102,8 @@ class ALKMyFormCell: ALKFormCell {
         itemListView.layout {
             $0.top == messageView.bottomAnchor + ChatCellPadding.SentMessage.MessageButton.top
             $0.bottom == timeLabel.topAnchor - ChatCellPadding.SentMessage.MessageButton.bottom
-            $0.leading == messageView.leadingAnchor + templateLeftPadding
-            $0.trailing == trailingAnchor - ChatCellPadding.SentMessage.MessageButton.right
+            $0.leading == leadingAnchor + templateLeftPadding
+            $0.trailing == trailingAnchor - templateRightPadding
         }
     }
 }
