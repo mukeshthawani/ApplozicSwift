@@ -847,6 +847,8 @@ open class ALKConversationViewController: ALKBaseViewController, Localizable {
 
             case .shareContact:
                 weakSelf.shareContact()
+            case .showDocumentPicker:
+                ALKDocumentManager.shared.showPicker(from: weakSelf)
             default:
                 print("Not available")
             }
