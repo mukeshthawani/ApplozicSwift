@@ -1352,6 +1352,32 @@ open class ALKConversationViewModel: NSObject, Localizable {
         return names
     }
 
+    func sendFile(at url: URL, metadata: [AnyHashable: Any]?) -> (ALMessage?, IndexPath?) {
+        var fileData: Data?
+        do {
+            fileData = try Data(contentsOf: url)
+        } catch let error {
+            print("Failed to read the content of the file at path: \(url) due to error: \(error.localizedDescription)")
+        }
+        guard let data = fileData else { return (nil, nil) }
+        switch data.saveToDisk(fileExtension: url.pathExtension) {
+        case .success(let url):
+            guard let alMessage = processAttachment(
+                filePath: url,
+                text: "",
+                contentType: Int(ALMESSAGE_CONTENT_ATTACHMENT),
+                metadata: metadata
+                ) else {
+                    return (nil, nil)
+            }
+            addToWrapper(message: alMessage)
+            return (alMessage, IndexPath(row: 0, section: messageModels.count - 1))
+        case .failure(let error):
+            print("Error while saving the file: \(url), \(error.localizedDescription)")
+            return (nil, nil)
+        }
+    }
+
     // MARK: - Private Methods
 
     private func updateGroupInfo(
